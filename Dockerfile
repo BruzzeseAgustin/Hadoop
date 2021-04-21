@@ -1,4 +1,3 @@
-# https://www.writecode.es/2019-02-25-cluster_hadoop_docker/
 FROM ubuntu:16.04
 MAINTAINER Agus
 
