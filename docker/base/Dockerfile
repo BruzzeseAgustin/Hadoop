@@ -1,21 +1,34 @@
 FROM ubuntu:16.04
-MAINTAINER Agus
+MAINTAINER bruzzese
 
+RUN apt-get update && apt-get install -y curl tree nano net-tools iputils-ping
 RUN apt-get update && apt-get install -y openssh-server openjdk-8-jdk wget
 
-# install hadoop 2.7.2
-RUN wget http://apache.rediris.es/hadoop/common/hadoop-2.7.7/hadoop-2.7.7.tar.gz && \
-    tar -xzvf hadoop-2.7.7.tar.gz && \
-    mv hadoop-2.7.7 /usr/local/hadoop && \
-    rm hadoop-2.7.7.tar.gz
+ENV HADOOP_VERSION 3.2.2
+ENV HADOOP_URL https://www.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz
+
+RUN set -x \
+    && wget "$HADOOP_URL" -o /tmp/hadoop.tar.gz \
+    && gpg --verify /tmp/hadoop.tar.gz.asc \
+    && tar -xvf /tmp/hadoop.tar.gz -C /opt/ \
+    && rm /tmp/hadoop.tar.gz*
+
+RUN ln -s /opt/hadoop-$HADOOP_VERSION/etc/hadoop /etc/hadoop
+
+RUN mkdir /opt/hadoop-$HADOOP_VERSION/logs
+
+RUN mkdir /hadoop-data
 
 # Establecemos las variables de entorno JAVA_HOME apuntando a la ruta del JDK, HADOOP_HOME apuntando a 
 # la ruta en la que hemos copiado Hadoop e incluimos en la variable PATH las rutas con los binarios y # scripts para gestionar Hadoop.
 
-# set environment variable
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 
 ENV HADOOP_HOME=/usr/local/hadoop 
-ENV PATH=$PATH:/usr/local/hadoop/bin:/usr/local/hadoop/sbin 
+ENV HADOOP_CONF_DIR=/etc/hadoop
+ENV MULTIHOMED_NETWORK=1
+ENV USER=root
+ENV PATH $HADOOP_HOME/bin/:$PATH
+#ENV PATH=$PATH:/usr/local/hadoop/bin:/usr/local/hadoop/sbin 
 
 # Creamos las claves ssh necesarias para que se comunique el nodo master con los nodos slaves.
 # Al tener todos las mismas claves e incluirlas como claves autorizadas, el acceso ssh entre los distintos nodos está garantizado.
@@ -44,4 +57,25 @@ RUN mv /tmp/ssh_config ~/.ssh/config && \
 RUN chmod +x ~/start-hadoop.sh && \
     chmod +x $HADOOP_HOME/sbin/start-dfs.sh && \
     chmod +x $HADOOP_HOME/sbin/start-yarn.sh 
+
+# Formateamos el sistema de ficheros de hadoop.
+RUN /usr/local/hadoop/bin/hdfs namenode -format
+
+# Como proceso de los contenedores configuramos el demonio de ssh. 
+# As’el nodo master podrá acceder a los nodos slave para arrancar los procesos de Hadoop necesarios para que formen parte del cluster.
+
+CMD [ "sh", "-c", "service ssh start; bash"]
+
+# Por último dejamos abiertos unos cuantos puertos. En principio no son necesarios todos, pero los dejo así por si en un futuro los necesito.
+
+# Hdfs ports
+EXPOSE 9000 50010 50020 50070 50075 50090
+EXPOSE 9871 9870 9820 9869 9868 9867 9866 9865 9864
+# Mapred ports
+EXPOSE 19888
+#Yarn ports
+EXPOSE 8030 8031 8032 8033 8040 8042 8088 8188
+#Other ports
+EXPOSE 49707 2122
+
 
