@@ -1,35 +1,8 @@
 #!/bin/bash
 
 # create base hadoop cluster docker image
-docker build -f docker/base/Dockerfile -t bruzzese/hadoop-cluster-base:latest docker/base
+docker build -f docker/base/Dockerfile -t hadoop-cluster-base:latest docker/base
 
-# create master node hadoop cluster docker image
-docker build -f docker/master/Dockerfile -t bruzzese/hadoop-cluster-master:latest docker/master
-
-
-# the default node number is 3
-N=${1:-3}
-
-docker network create --driver=bridge hadoop &> /dev/null
-
-# start hadoop slave container
-i=1
-while [ $i -lt $N ]
-do
-	docker rm -f hadoop-slave$i &> /dev/null
-	echo "start hadoop-slave$i container..."
-	docker run -itd \
-	                --net=hadoop \
-	                --name hadoop-slave$i \
-	                --hostname hadoop-slave$i \
-	                bruzzese/hadoop-cluster-base
-	i=$(( $i + 1 ))
-done 
-
-
-
-# start hadoop master container
-docker rm -f hadoop-master &> /dev/null
 echo "start hadoop-master container..."
 docker run -itd \
                 --net=hadoop \
@@ -40,7 +13,10 @@ docker run -itd \
 				-v $PWD/data:/data \
                 bruzzese/hadoop-cluster-master
 
+docker run -p 9864:9864 -p 9870:9870 -p 8088:8088 \
+	--name hadoop-container \
+	-d hadoop-cluster-base:latest
 
 
 # get into hadoop master container
-docker exec -it hadoop-master bash
+docker exec -it hadoop-container bash
