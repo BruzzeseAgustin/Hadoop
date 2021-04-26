@@ -92,6 +92,11 @@ There are few environment variables that needs to be set to make it easier to ex
 
 ###
 
+export YARN_USER=yarn
+export HDFS_USER=hdfs
+export MAPRED_USER=mapred
+export HADOOP_GROUP=hadoop
+
 export HADOOP_COMMON_HOME=$HADOOP_HOME
 
 export HADOOP_HDFS_HOME=$HADOOP_HOME
@@ -109,12 +114,12 @@ export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
 export HADOOP_PID_DIR=${HADOOP_PID_DIR}
 export HADOOP_SECURE_DN_PID_DIR=${HADOOP_PID_DIR}
 
-export HDFS_NAMENODE_USER=hdfs
-export HDFS_DATANODE_USER=hdfs
-export HDFS_SECONDARYNAMENODE_USER=hdfs
+export HDFS_NAMENODE_USER=$HDFS_USER
+export HDFS_DATANODE_USER=$HDFS_USER
+export HDFS_SECONDARYNAMENODE_USER=$HDFS_USER
 
-export YARN_RESOURCEMANAGER_USER=yarn
-export YARN_NODEMANAGER_USER=yarn
+export YARN_RESOURCEMANAGER_USER=$YARN_USER
+export YARN_NODEMANAGER_USER=$YARN_USER
 
 # A string representing this instance of hadoop. $USER by default.
 export HADOOP_IDENT_STRING=$USER

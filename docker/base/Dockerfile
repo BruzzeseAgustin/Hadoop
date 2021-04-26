@@ -73,16 +73,20 @@ COPY config/docker-entrypoint.sh $HADOOP_HOME/etc/hadoop/
 
 ARG user_1=hdfs
 ARG user_2=yarn
+ARG user_3=mapred
 ARG group=hadoop
 ARG uid_1=1000
 ARG uid_2=1001
+ARG uid_3=1002
 ARG gid=1000
 
 RUN groupadd -g ${gid} ${group} && useradd -u ${uid_1} -g ${group} -s /bin/sh ${user_1} && \
-	useradd -u ${uid_2} -g ${group} -s /bin/sh ${user_2}
+	useradd -u ${uid_2} -g ${group} -s /bin/sh ${user_2} && \
+	useradd -u ${uid_3} -g ${group} -s /bin/sh ${user_3}
 
 RUN mkdir -p /var/log/hadoop-hdfs && \ 
 	mkdir -p /var/log/hadoop-yarn/ && \
+	mkdir -p /var/log/hadoop-mapreduce/ && \
 	mkdir -p /dfs/name && \
 	mkdir -p /dfs/data && \ 
 	chown -R  hdfs:hadoop /dfs && \
