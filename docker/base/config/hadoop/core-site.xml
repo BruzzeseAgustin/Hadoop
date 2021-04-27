@@ -17,9 +17,21 @@
 <!-- Put site-specific property overrides in this file. -->
 
 <configuration>
-    <property>
-        <name>fs.defaultFS</name>
-        <value>hdfs://localhost:9000</value>
-    </property>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://localhost:9000</value>
+  </property>
+
+  <!-- Kerberos -->
+  <property>
+    <name>hadoop.security.authentication</name>
+    <value>kerberos</value> <!-- A value of "simple" would disable security. -->
+  </property>
+  
+  <property>
+    <name>hadoop.security.authorization</name>
+    <value>true</value>
+  </property>
+
 </configuration>
 
