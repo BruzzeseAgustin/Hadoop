@@ -1,31 +1,40 @@
 <?xml version="1.0"?>
 <configuration>
-	<property>
-        	<name>mapreduce.framework.name</name>
-		<value>yarn</value>
-	</property>
-
-	<property>
-		<name>mapreduce.jobhistory.address</name>
-		<value>localhost:10020</value>
-		<description>Default port is 10020.</description>
-	</property>
-
-	<property>
-		<name>mapreduce.jobhistory.webapp.address</name>
-		<value>localhost:19888</value>
-		<description>Default port is 19888.</description>
-	</property>
-
-	<property>
-		<name>mapreduce.jobhistory.intermediate-done-dir</name>
-		<value>/mr-history/tmp</value>
-		<description>Directory where history files are written by MapReduce jobs.</description>
-	</property>
-
-	<property>
-		<name>mapreduce.jobhistory.done-dir</name>
-		<value>/mr-history/done</value>
-		<description>Directory where history files are managed by the MR JobHistory Server.</description>
-	</property>
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+    </property>
+    <property>
+        <name>mapreduce.jobhistory.keytab</name>
+        <value>/var/keytabs/mapred.keytab</value>
+    </property> 
+    <property>
+	<name>mapreduce.jobhistory.address</name>
+	<value>localhost:10020</value>
+	<description>Default port is 10020.</description>
+    </property>     
+    <property>
+         <name>mapreduce.jobhistory.principal</name>
+         <value>mapred/_HOST@EXAMPLE.COM</value>
+    </property> 
+     
+    <property>
+         <name>mapreduce.jobhistory.webapp.address</name>
+         <value>localhost:19888</value>
+    </property> 
+     
+    <property>
+         <name>mapreduce.jobhistory.webapp.https.address</name>
+         <value>localhost:19889</value>
+    </property> 
+     
+    <property>
+         <name>mapreduce.jobhistory.webapp.spnego-keytab-file</name>
+         <value>/var/keytabs/mapred.keytab</value>
+    </property> 
+     
+    <property>
+         <name>mapreduce.jobhistory.webapp.spnego-principal</name>
+         <value>HTTP/_HOST@EXAMPLE.COM</value>
+    </property>  
 </configuration>

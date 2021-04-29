@@ -41,12 +41,6 @@
   <property>  
     <name>hadoop.security.auth_to_local</name>
     <value>
-    RULE:[2:$1@$0]([jt]t@.*EXAMPLE.COM)s/.*/root/
-    RULE:[2:$1@$0]([nd]n@.*EXAMPLE.COM)s/.*/root/
-    RULE:[2:$1@$0](hm@.*EXAMPLE.COM)s/.*/root/
-    RULE:[2:$1@$0](rs@.*EXAMPLE.COM)s/.*/root/
-    RULE:[2:$1@$0](rm@.*EXAMPLE.COM)s/.*/root/
-    RULE:[2:$1@$0](jhs@.*EXAMPLE.COM)s/.*/root/
     DEFAULT
     </value>
     <description>
