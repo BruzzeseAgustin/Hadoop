@@ -72,8 +72,8 @@ klist -ket ${KEYTAB_DIR}/mapred.keytab
 klist -ket ${KEYTAB_DIR}/HTTP.keytab
 
 # Start the service
-chkconfig --level 35 krb5kdc on
-chkconfig --level 35 kadmin on
+chkconfig krb5kdc on
+chkconfig kadmin on
 krb5kdc -n
 kadmind -nofork
 
@@ -81,6 +81,7 @@ echo 'Y' | sudo -E -u hdfs $HADOOP_HOME/bin/hdfs namenode -format
 
 mkdir -p /tmp/hadoop-hdfs/dfs/
 
+# Start HDFS, YARM, and MAPREDUCE daemons
 supervisord
 
 # At this point, the configuration is complete, and each component needs to be started
