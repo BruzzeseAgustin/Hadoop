@@ -39,18 +39,18 @@ ENV HADOOP_VERSION 3.2.2
 ENV HADOOP_URL https://www.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz
 ENV HADOOP_CONF_DIR $HADOOP_HOME/etc/hadoop
 
-RUN set -x \
-    && wget -q "$HADOOP_URL" -O /tmp/hadoop.tar.gz \
-    && tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
-    && mv /tmp/hadoop-$HADOOP_VERSION $HADOOP_HOME \
-    && echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_CONF_DIR/hadoop-env.sh \
-    && echo "PATH=$PATH:$HADOOP_HOME/bin" >> ~/.bashrc
-
-# COPY zip/hadoop.tar.gz /tmp/hadoop.tar.gz
-# RUN tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
+# RUN set -x \
+#     && wget -q "$HADOOP_URL" -O /tmp/hadoop.tar.gz \
+#     && tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
 #     && mv /tmp/hadoop-$HADOOP_VERSION $HADOOP_HOME \
 #     && echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_CONF_DIR/hadoop-env.sh \
 #     && echo "PATH=$PATH:$HADOOP_HOME/bin" >> ~/.bashrc
+
+COPY zip/hadoop.tar.gz /tmp/hadoop.tar.gz
+RUN tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
+    && mv /tmp/hadoop-$HADOOP_VERSION $HADOOP_HOME \
+    && echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_CONF_DIR/hadoop-env.sh \
+    && echo "PATH=$PATH:$HADOOP_HOME/bin" >> ~/.bashrc
 
 # Copiamos los ficheros de configuración y scripts que tenemos en el directorio config al directorio de hadoop
 # Más adelante debería explicar cada fichero y su contenido...
@@ -123,17 +123,7 @@ ENV PATH="${HADOOP_HOME}/bin:${HADOOP_HOME}/sbin:${SPARK_HOME}/bin:${SPARK_HOME}
 ############################################################
 
 # Descargar Kerberos 
-# REALM 	the Kerberos realm
-ENV KRB_REALM EXAMPLE.COM
-# DOMAIN_REALM 	the DNS domain for the realm
-ENV DOMAIN_REALM example.com
-# KERB_MASTER_KEY 	master key for the KDC
-ENV KERBEROS_ADMIN admin/admin
-# KERB_ADMIN_USER 	administrator account name
-ENV KERBEROS_ADMIN_PASSWORD admin
-# KERB_ADMIN_PASS 	administrator's password
-ENV KERBEROS_ROOT_USER_PASSWORD password
-ENV KEYTAB_DIR /var/keytabs
+
 
 RUN yum -y install \
         krb5-server \
@@ -144,6 +134,21 @@ RUN yum -y install \
     yum clean all && \
     rm -rf /var/cache/yum/*
 
+## KERBEROS VARIABLES
+# REALM 	the Kerberos realm
+ENV KRB_REALM EXAMPLE.COM
+# DOMAIN_REALM 	the DNS domain for the realm
+ENV DOMAIN_REALM example.com
+# KERB_MASTER_KEY 	master key for the KDC
+ENV KERB_MASTER_KEY masterkey
+# KERB_ADMIN_USER 	administrator account name
+ENV KERBEROS_ADMIN root
+# KERB_PRINCIPAL_USER
+ENV KERBEROS_ADMIN root/admin
+# KERBEROS_ADMIN_PASSWORD administrator account pass
+ENV KERBEROS_ADMIN_PASSWORD admin
+# KEYTAB_DIR 
+ENV KEYTAB_DIR /var/keytabs
 # config kerberos
 COPY config/kerberos/kdb.conf /var/lib/krb5kdc/kdb.conf
 COPY config/kerberos/kdc.conf /var/kerberos/krb5kdc/kdc.conf
