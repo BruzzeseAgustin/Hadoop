@@ -28,7 +28,22 @@
   <property> 
     <name>dfs.permissions</name> 
     <value>true</value> 
+    <description> 
+         If "true", enable permission checking in
+         HDFS. If "false", permission checking is turned
+         off, but all other behavior is
+         unchanged. Switching from one parameter value to the other does
+         not change the mode, owner or group of files or
+         directories. 
+    </description>
   </property>
+
+  <property>
+    <name>dfs.permissions.supergroup</name>
+    <value>root</value>
+    <description>The name of the group of super-users.</description>
+  </property>
+
   <property>
     <name>dfs.block.access.token.enable</name>
     <value>true</value>
@@ -49,18 +64,32 @@
   
   <!-- NameNode security config -->
   <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>/dfs/name</value> 
+  </property>
+  <property>
+    <name>dfs.namenode.data.dir.perm</name>
+    <value>700</value> 
+  </property>
+  <property>
+    <name>dfs.namenode.acls.enabled</name>
+    <value>true</value> 
+  </property>
+  <property>
     <name>dfs.namenode.keytab.file</name>
     <value>/var/keytabs/hdfs.keytab</value>
   </property>
+  <!--  Kerberos principal name for the NameNode. -->
   <property>
     <name>dfs.namenode.kerberos.principal</name>
     <value>hdfs/_HOST@EXAMPLE.COM</value>
+    <description> Kerberos principal name for the NameNode </description>
   </property>
+
   <property>
     <name>dfs.namenode.kerberos.internal.spnego.principal</name>
     <value>HTTP/_HOST@EXAMPLE.COM</value>
   </property>
-
 
   <!-- For testing, we want tokens to expire FAST -->
   <property>
@@ -79,28 +108,6 @@
     <name>dfs.data.transfer.protection</name>
     <value>integrity</value>
   </property>
-   
-  <property>
-    <name>dfs.datanode.address</name>
-    <value>0.0.0.0:10019</value>
-  </property>
-   
-  <property>
-    <name>dfs.datanode.http.address</name>
-    <value>0.0.0.0:10022</value>
-  </property>
-   
-  <property>
-    <name>dfs.http.policy</name>
-    <value>HTTPS_ONLY</value>
-  </property>
-
-  <property>
-    <name>dfs.namenode.kerberos.principal</name>
-    <value>hdfs/_HOST@EXAMPLE.COM</value>
-  </property>
-
-
   <property>
     <name>dfs.datanode.data.dir</name>
     <value>/dfs/data</value>
@@ -116,6 +123,10 @@
   <property>
     <name>dfs.datanode.kerberos.principal</name>
     <value>hdfs/_HOST@EXAMPLE.COM</value>
+    <description>
+    The Kerberos principal that the DataNode runs as. "_HOST" is replaced by the real
+    host name.
+    </description>
   </property>
 
   <!-- Web Authentication config -->
@@ -129,7 +140,7 @@
   </property>
   <property>
     <name>dfs.web.authentication.kerberos.keytab</name>
-    <value>/var/keytabs/hdfs.keytab</value> <!-- path to the HTTP keytab -->
+    <value>/var/keytabs/hdfs.keytab </value> <!-- path to the HTTP keytab -->
   </property>
 
 </configuration>

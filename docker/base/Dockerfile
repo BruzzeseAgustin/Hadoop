@@ -9,6 +9,7 @@ RUN yum -y install epel-release \
         python \
         python-dev \
  	python-pip \
+	python-setuptools \
         rsync \
         software-properties-common \
         unzip \
@@ -75,9 +76,9 @@ ENV SPARK_HOME /usr/local/spark
 ENV SPARK_VERSION 3.1.1
 ENV SPARK_URL https://mirrors.estointernet.in/apache/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-without-hadoop.tgz
 
-RUN wget -q "$SPARK_URL" -O /tmp/spark.tgz && \
-	tar -xvf /tmp/spark.tgz -C /tmp/ && \
-	mv -v /tmp/spark-$SPARK_VERSION-bin-without-hadoop $SPARK_HOME
+# RUN wget -q "$SPARK_URL" -O /tmp/spark.tgz && \
+# 	tar -xvf /tmp/spark.tgz -C /tmp/ && \
+#	mv -v /tmp/spark-$SPARK_VERSION-bin-without-hadoop $SPARK_HOME
 
 #COPY zip/spark.tgz /tmp/spark.tgz 
 # RUN tar -xvf /tmp/spark.tgz -C /tmp/ && \
@@ -122,7 +123,12 @@ ENV PATH="${HADOOP_HOME}/bin:${HADOOP_HOME}/sbin:${SPARK_HOME}/bin:${SPARK_HOME}
 
 # Descargar Kerberos 
 
-ENV KDC_MASTER_PASSWORD secret
+ENV KRB_REALM EXAMPLE.COM
+ENV DOMAIN_REALM example.com
+ENV KERBEROS_ADMIN admin/admin
+ENV KERBEROS_ADMIN_PASSWORD admin
+ENV KERBEROS_ROOT_USER_PASSWORD password
+ENV KEYTAB_DIR /var/keytabs
 
 RUN yum -y install \
         krb5-server \
@@ -138,22 +144,36 @@ COPY config/kerberos/krb5.conf /etc/krb5.conf
 COPY config/kerberos/kdb.conf /var/lib/krb5kdc/kdb.conf
 
 RUN mkdir -p /var/log/kerberos \
-	&& kdb5_util -P "${KDC_MASTER_PASSWORD}" create -s \
-	&& kadmin.local -q "ank -randkey hdfs/localhost" \
-	&& kadmin.local -q "ank -randkey yarn/localhost" \
-	&& kadmin.local -q "ank -randkey mapred/localhost" \
-	&& kadmin.local -q "ank -randkey HTTP/localhost" \
-	&& mkdir -p /var/keytabs/ \
-	&& kadmin.local -q "xst -k /var/keytabs/hdfs.keytab hdfs/localhost HTTP/localhost" \
-	&& kadmin.local -q "xst -k /var/keytabs/yarn.keytab yarn/localhost HTTP/localhost" \
-	&& kadmin.local -q "xst -k /var/keytabs/mapred.keytab hive/localhost" \
-	&& kadmin.local -q "xst -k /var/keytabs/HTTP.keytab HTTP/localhost" \
-	&& chown hdfs:hadoop /var/keytabs/hdfs.keytab \
-	&& chown yarn:hadoop /var/keytabs/yarn.keytab \
-	&& chown map:hadoop /var/keytabs/map.keytab \
-	&& chown hdfs:hadoop /var/keytabs/HTTP.keytab \
-	&& chmod 640 /var/keytabs/*.keytab 
-
+	&& mkdir -p ${KEYTAB_DIR} \ 
+	&& chkconfig --level 35 krb5kdc on \
+	&& chkconfig --level 35 kadmin on \
+	&& kdb5_util -P "${KERBEROS_ADMIN_PASSWORD}" create -s \
+	&& kadmin.local -q "addprinc -randkey hdfs/localhost" \
+	&& kadmin.local -q "addprinc -randkey yarn/localhost" \
+	&& kadmin.local -q "addprinc -randkey mapred/localhost" \
+	&& kadmin.local -q "addprinc -randkey HTTP/localhost" \
+	&& kadmin.local -q "xst -k ${KEYTAB_DIR}/hdfs.keytab hdfs/localhost HTTP/localhost" \
+	&& kadmin.local -q "xst -k ${KEYTAB_DIR}/yarn.keytab yarn/localhost HTTP/localhost" \
+	&& kadmin.local -q "xst -k ${KEYTAB_DIR}/mapred.keytab mapred/localhost HTTP/localhost" \
+	&& kadmin.local -q "xst -k ${KEYTAB_DIR}/HTTP.keytab HTTP/localhost" \
+	&& klist -ket ${KEYTAB_DIR}/hdfs.keytab \
+ 	&& klist -ket ${KEYTAB_DIR}/yarn.keytab \
+	&& klist -ket ${KEYTAB_DIR}/HTTP.keytab \
+	&& kadmin.local -q "ktadd -k ${KEYTAB_DIR}/hdfs.keytab hdfs/localhost HTTP/localhost" \
+	&& kadmin.local -q "ktadd -k ${KEYTAB_DIR}/yarn.keytab yarn/localhost HTTP/localhost" \
+	&& kadmin.local -q "ktadd -k ${KEYTAB_DIR}/mapred.keytab mapred/localhost HTTP/localhost" \
+	&& kadmin.local -q "ktadd -k ${KEYTAB_DIR}/HTTP.keytab HTTP/localhost" \
+	&& chown hdfs:hadoop ${KEYTAB_DIR}/hdfs.keytab \
+	&& chown yarn:hadoop ${KEYTAB_DIR}/yarn.keytab \
+	&& chown mapred:hadoop ${KEYTAB_DIR}/mapred.keytab \
+	&& chown hdfs:hadoop ${KEYTAB_DIR}/HTTP.keytab \
+	&& chmod 640 ${KEYTAB_DIR}/*.keytab \
+	&& kadmin.local -q "listprincs" \
+	&& klist -ket ${KEYTAB_DIR}/hdfs.keytab \
+ 	&& klist -ket ${KEYTAB_DIR}/yarn.keytab \
+ 	&& klist -ket ${KEYTAB_DIR}/mapred.keytab \
+	&& klist -ket ${KEYTAB_DIR}/HTTP.keytab
+	
 # config ssh
 RUN ssh-keygen -t rsa -P '' -f /etc/ssh/ssh_host_rsa_key \
 	&& ssh-keygen -t rsa -P '' -f /etc/ssh/ssh_host_ecdsa_key \

@@ -14,6 +14,7 @@ docker run -itd \
                 bruzzese/hadoop-cluster-master
 
 docker run -p 9864:9864 -p 9870:9870 -p 8088:8088 \
+	-h localhost \
 	--name hadoop-container \
 	-d hadoop-cluster-base:latest
 
