@@ -45,7 +45,7 @@ chkconfig --level 35 krb5kdc on
 chkconfig --level 35 kadmin on 
 
 # Create admin user, it should match with the ACL user
-kadmin.local -q "addprinc -pw ${KERBEROS_ADMIN_PASSWORD} ${KERBEROS_ADMIN}"
+kadmin.local -q "addprinc -pw ${KERBEROS_ADMIN_PASSWORD} ${KERB_PRINCIPAL_USER}"
 # create namenode kerberos principal and keytab
 kadmin.local -q "addprinc -randkey hdfs/${KDC_ADDRES}" 
 kadmin.local -q "addprinc -randkey yarn/${KDC_ADDRES}" 
@@ -74,8 +74,14 @@ klist -ket ${KEYTAB_DIR}/HTTP.keytab
 # Start the service
 chkconfig krb5kdc on
 chkconfig kadmin on
-krb5kdc -n
-kadmind -nofork
+krb5kdc 
+kadmind 
+
+# At this point, the configuration is complete, and each component needs to be started
+kinit -kt ${KEYTAB_DIR}/hdfs.keytab hdfs/$(hostname -f)
+kinit -kt ${KEYTAB_DIR}/yarn.keytab yarn/$(hostname -f)  
+kinit -kt ${KEYTAB_DIR}/mapred.keytab mapred/$(hostname -f)  
+kinit -kt ${KEYTAB_DIR}/HTTP.keytab HTTP/$(hostname -f)
 
 echo 'Y' | sudo -E -u hdfs $HADOOP_HOME/bin/hdfs namenode -format 
 
@@ -83,12 +89,6 @@ mkdir -p /tmp/hadoop-hdfs/dfs/
 
 # Start HDFS, YARM, and MAPREDUCE daemons
 supervisord
-
-# At this point, the configuration is complete, and each component needs to be started
-kinit -kt ${KEYTAB_DIR}/hdfs.keytab hdfs/${KDC_ADDRES} 
-kinit -kt ${KEYTAB_DIR}/yarn.keytab yarn/${KDC_ADDRES}  
-kinit -kt ${KEYTAB_DIR}/mapred.keytab mapred/${KDC_ADDRES}  
-kinit -kt ${KEYTAB_DIR}/HTTP.keytab HTTP/${KDC_ADDRES}
 
 sudo chmod -R 777 /usr/local/hadoop
 
