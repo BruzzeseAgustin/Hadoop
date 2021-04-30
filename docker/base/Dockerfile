@@ -126,7 +126,6 @@ ENV PATH="${HADOOP_HOME}/bin:${HADOOP_HOME}/sbin:${SPARK_HOME}/bin:${SPARK_HOME}
 
 # Descargar Kerberos 
 
-
 RUN yum -y install \
         krb5-server \
         krb5-workstation \
