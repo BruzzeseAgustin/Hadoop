@@ -39,18 +39,18 @@ ENV HADOOP_VERSION 3.2.2
 ENV HADOOP_URL https://www.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz
 ENV HADOOP_CONF_DIR $HADOOP_HOME/etc/hadoop
 
-# RUN set -x \
-#     && wget -q "$HADOOP_URL" -O /tmp/hadoop.tar.gz \
-#     && tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
-#     && mv /tmp/hadoop-$HADOOP_VERSION $HADOOP_HOME \
-#     && echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_CONF_DIR/hadoop-env.sh \
-#     && echo "PATH=$PATH:$HADOOP_HOME/bin" >> ~/.bashrc
-
-COPY zip/hadoop.tar.gz /tmp/hadoop.tar.gz
-RUN tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
+RUN set -x \
+    && wget -q "$HADOOP_URL" -O /tmp/hadoop.tar.gz \
+    && tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
     && mv /tmp/hadoop-$HADOOP_VERSION $HADOOP_HOME \
     && echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_CONF_DIR/hadoop-env.sh \
     && echo "PATH=$PATH:$HADOOP_HOME/bin" >> ~/.bashrc
+
+# COPY zip/hadoop.tar.gz /tmp/hadoop.tar.gz
+# RUN tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
+#     && mv /tmp/hadoop-$HADOOP_VERSION $HADOOP_HOME \
+#     && echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_CONF_DIR/hadoop-env.sh \
+#     && echo "PATH=$PATH:$HADOOP_HOME/bin" >> ~/.bashrc
 
 # Copiamos los ficheros de configuración y scripts que tenemos en el directorio config al directorio de hadoop
 # Más adelante debería explicar cada fichero y su contenido...
@@ -93,6 +93,7 @@ ENV SPARK_URL https://mirrors.estointernet.in/apache/spark/spark-$SPARK_VERSION/
 ENV HADOOP_USER_HDFS hdfs
 ENV HADOOP_USER_YARN yarn
 ENV HADOOP_USER_MAPRED mapred
+ENV HADOOP_USER_HTTP HTTP
 ARG HADOOP_GROUP=hadoop
 ARG group=hadoop
 
@@ -100,6 +101,7 @@ RUN groupadd -g 1001 $HADOOP_GROUP \
 	&& useradd -d /home/$HADOOP_USER_HDFS -m -u 1001 -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_HDFS $HADOOP_USER_HDFS \
 	&& useradd -d /home/$HADOOP_USER_YARN -m -u 1002 -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_YARN $HADOOP_USER_YARN \
 	&& useradd -d /home/$HADOOP_USER_MAPRED -m -u 1003 -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_MAPRED $HADOOP_USER_MAPRED \
+	&& useradd -d /home/$HADOOP_USER_HTTP -m -u 1004 -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_HTTP $HADOOP_USER_HTTP \
 	&& echo 'export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk' > $HADOOP_HOME/etc/hadoop/hadoop-env.sh  \
 	&& echo 'export HDFS_NAMENODE_USER=$HADOOP_USER_HDFS' >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh \
 	&& echo 'export HDFS_DATANODE_USER=$HADOOP_USER_HDFS' >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh \
@@ -156,8 +158,10 @@ COPY config/kerberos/kdc.conf /var/kerberos/krb5kdc/kdc.conf
 RUN mkdir -p /var/log/kerberos \
 	&& mkdir -p ${KEYTAB_DIR} \
 	&& mkdir -p /tmp/hadoop-yarn/staging/history/done \
+	&& mkdir -p /tmp/hadoop-yarn-yarn/staging/history/done \
 	&& chown -R  hdfs:hadoop /tmp/ \
 	&& chown -R  yarn:hadoop /tmp/hadoop-yarn-yarn/ \
+	&& chown -R  yarn:hadoop /tmp/hadoop-yarn/ \
 	&& chgrp -R hadoop -R /tmp/ \ 
 	&& chmod -R 770 /tmp/
 	

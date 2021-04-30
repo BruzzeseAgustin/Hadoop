@@ -35,6 +35,6 @@
      
     <property>
          <name>mapreduce.jobhistory.webapp.spnego-principal</name>
-         <value>HTTP/_HOST@EXAMPLE.COM</value>
+         <value>mapred/_HOST@EXAMPLE.COM</value>
     </property>  
 </configuration>

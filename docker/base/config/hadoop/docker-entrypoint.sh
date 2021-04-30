@@ -78,19 +78,22 @@ krb5kdc
 kadmind 
 
 # At this point, the configuration is complete, and each component needs to be started
-kinit -kt ${KEYTAB_DIR}/hdfs.keytab hdfs/$(hostname -f)
 kinit -kt ${KEYTAB_DIR}/yarn.keytab yarn/$(hostname -f)  
 kinit -kt ${KEYTAB_DIR}/mapred.keytab mapred/$(hostname -f)  
 kinit -kt ${KEYTAB_DIR}/HTTP.keytab HTTP/$(hostname -f)
 
-echo 'Y' | sudo -E -u hdfs $HADOOP_HOME/bin/hdfs namenode -format 
+# The most important user-ticker for start is hdfs user
+kinit -kt ${KEYTAB_DIR}/hdfs.keytab hdfs/$(hostname -f)
 
-mkdir -p /tmp/hadoop-hdfs/dfs/
+echo 'Y' | sudo -E -u hdfs $HADOOP_HOME/bin/hdfs namenode -format 
 
 # Start HDFS, YARM, and MAPREDUCE daemons
 supervisord
 
 sudo chmod -R 777 /usr/local/hadoop
+# Create tmp folder 
+hdfs dfs -mkdir /tmp
+hdfs dfs -chmod 777 /tmp
 
 # keep container running
 tail -f /dev/null
