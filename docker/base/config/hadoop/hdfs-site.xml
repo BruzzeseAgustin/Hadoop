@@ -10,9 +10,14 @@
         <name>dfs.permissions.enabled</name> 
         <value>true</value> 
     </property>
+  <!--
+    Specifies the UNIX group containing users that will be treated as superusers
+    by HDFS. You can stick with the value of 'hadoop' or pick your own group
+    depending on the security policies at your site.
+  -->
     <property> 
         <name>dfs.permissions.superusergroup</name> 
-        <value>hdfs</value> 
+        <value>hadoop</value> 
     </property>
     <property>
         <name>dfs.block.access.token.enable</name>

@@ -1,9 +1,58 @@
 <?xml version="1.0"?>
 <configuration>
+
+
+  <!--
+    The staging dir used while submitting jobs.
+  -->
+  <property>
+    <name>yarn.app.mapreduce.am.staging-dir</name>
+    <value>/tmp/hadoop-yarn/staging</value>
+  </property>
+
+  <!--
+    The maximum size of user-logs of each task in KB.
+    0 disables the cap.
+  -->
     <property>
-        <name>mapreduce.framework.name</name>
-        <value>yarn</value>
+        <name>mapreduce.task.userlog.limit.kb</name>
+        <value>512</value>
     </property>
+
+  <!--
+    The maximum size of the MRAppMaster attempt container logs in KB.
+    0 disables the cap.
+  -->
+    <property>
+        <name>yarn.app.mapreduce.am.container.log.limit.kb</name>
+        <value>512</value>
+    </property>
+
+  <!--
+    Number of backup files for the ApplicationMaster logs when using
+    ContainerRollingLogAppender (CRLA).
+    See org.apache.log4j.RollingFileAppender.maxBackupIndex. By default,
+    ContainerLogAppender (CLA) is used, and container logs are not rolled.
+    CRLA is enabled for the ApplicationMaster when both
+    mapreduce.task.userlog.limit.kb and
+    yarn.app.mapreduce.am.container.log.backups are greater than zero.
+  -->
+    <property>
+        <name>yarn.app.mapreduce.am.container.log.backups</name>
+        <value>4</value>
+    </property>
+  <!--
+    Number of backup files for task logs when using ContainerRollingLogAppender (CRLA).
+    See org.apache.log4j.RollingFileAppender.maxBackupIndex. By default,
+    ContainerLogAppender (CLA) is used, and container logs are not rolled.
+    CRLA is enabled for tasks when both mapreduce.task.userlog.limit.kb and
+    yarn.app.mapreduce.task.container.log.backups are greater than zero.
+  -->
+    <property>
+        <name>yarn.app.mapreduce.task.container.log.backups</name>
+        <value>4</value>
+    </property>
+
     <property>
         <name>mapreduce.jobhistory.keytab</name>
         <value>/var/keytabs/mapred.keytab</value>
@@ -37,7 +86,16 @@
          <name>mapreduce.jobhistory.webapp.spnego-principal</name>
          <value>mapred/_HOST@EXAMPLE.COM</value>
     </property>  
-    
+
+    <property>
+        <name>mapreduce.jobtracker.kerberos.principal</name>
+        <value>mapred/_HOST@EXAMPLE.COM</value>
+    </property>
+    <property>
+        <name>mapreduce.jobtracker.keytab.file</name>
+        <value>/var/keytabs/mapred.keytab</value>
+    </property>
+
     <property>
         <name>yarn.app.mapreduce.am.env</name>
         <value>HADOOP_MAPRED_HOME=${HADOOP_HOME}</value>
@@ -75,6 +133,30 @@
 	 where VARNAME is the name of the environment variable. This is the only
 	 way to add a variable when its value contains commas.
 	 contains commas.
+  	</description>
+    </property>
+
+    <property>
+        <name>mapreduce.reduce.shuffle.memory.limit.percent</name>
+        <value>0.20</value>
+  	<description>
+	Reduce Task - Fetcher
+  	</description>
+    </property>
+
+    <property>
+        <name>mapreduce.reduce.shuffle.input.buffer.percent</name>
+        <value>0.70</value>
+  	<description>
+	Reduce Task 
+  	</description>
+    </property>
+
+    <property>
+        <name>mapreduce.reduce.shuffle.parallelcopies</name>
+        <value>4</value>
+  	<description>
+	Reduce Task 
   	</description>
     </property>
 

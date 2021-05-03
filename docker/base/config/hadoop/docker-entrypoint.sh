@@ -46,21 +46,27 @@ chkconfig --level 35 kadmin on
 
 # Create admin user, it should match with the ACL user
 kadmin.local -q "addprinc -pw ${KERBEROS_ADMIN_PASSWORD} ${KERB_PRINCIPAL_USER}"
+
 # create namenode kerberos principal and keytab
 kadmin.local -q "addprinc -randkey hdfs/${KDC_ADDRES}" 
 kadmin.local -q "addprinc -randkey yarn/${KDC_ADDRES}" 
 kadmin.local -q "addprinc -randkey mapred/${KDC_ADDRES}" 
 kadmin.local -q "addprinc -randkey HTTP/${KDC_ADDRES}" 
+kadmin.local -q "addprinc -pw ${KERBEROS_ADMIN_PASSWORD} abruzzese/${KDC_ADDRES}"
+
 # Create a keytab file
 kadmin.local -q "xst -k ${KEYTAB_DIR}/hdfs.keytab hdfs/${KDC_ADDRES} HTTP/${KDC_ADDRES}"  
 kadmin.local -q "xst -k ${KEYTAB_DIR}/yarn.keytab yarn/${KDC_ADDRES} HTTP/${KDC_ADDRES}"  
 kadmin.local -q "xst -k ${KEYTAB_DIR}/mapred.keytab mapred/${KDC_ADDRES} HTTP/${KDC_ADDRES}" 
+kadmin.local -q "xst -k ${KEYTAB_DIR}/abruzzese.keytab abruzzese/${KDC_ADDRES} HTTP/${KDC_ADDRES}"
 kadmin.local -q "xst -k ${KEYTAB_DIR}/HTTP.keytab HTTP/${KDC_ADDRES}" 
 
 chown hdfs:hadoop ${KEYTAB_DIR}/hdfs.keytab 
 chown yarn:hadoop ${KEYTAB_DIR}/yarn.keytab 
 chown mapred:hadoop ${KEYTAB_DIR}/mapred.keytab 
 chown hdfs:hadoop ${KEYTAB_DIR}/HTTP.keytab  
+chown abruzzese:hadoop ${KEYTAB_DIR}/abruzzese.keytab
+
 chgrp -R hadoop ${KEYTAB_DIR}/*.keytab 
 chmod 640 ${KEYTAB_DIR}/*.keytab
 
@@ -70,6 +76,7 @@ klist -ket ${KEYTAB_DIR}/hdfs.keytab
 klist -ket ${KEYTAB_DIR}/yarn.keytab 
 klist -ket ${KEYTAB_DIR}/mapred.keytab 
 klist -ket ${KEYTAB_DIR}/HTTP.keytab
+klist -ket ${KEYTAB_DIR}/abruzzese.keytab
 
 # Start the service
 chkconfig krb5kdc on
@@ -84,6 +91,7 @@ kinit -kt ${KEYTAB_DIR}/HTTP.keytab HTTP/$(hostname -f)
 
 # The most important user-ticker for start is hdfs user
 kinit -kt ${KEYTAB_DIR}/hdfs.keytab hdfs/$(hostname -f)
+kinit -kt ${KEYTAB_DIR}/abruzzese.keytab abruzzese/$(hostname -f)
 
 echo 'Y' | sudo -E -u hdfs $HADOOP_HOME/bin/hdfs namenode -format 
 
@@ -92,8 +100,12 @@ supervisord
 
 sudo chmod -R 777 /usr/local/hadoop
 # Create tmp folder 
-hdfs dfs -mkdir /tmp
-hdfs dfs -chmod 777 /tmp
+# hdfs dfs -mkdir /tmp
+# hdfs dfs -chmod 777 /tmp
+# hdfs dfs -mkdir /user
+# hdfs dfs -chmod 777 /user
+# hdfs dfs -mkdir /apps
+# hdfs dfs -chmod 777 /apps
 
 # keep container running
 tail -f /dev/null

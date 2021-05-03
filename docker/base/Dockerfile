@@ -94,6 +94,8 @@ ENV HADOOP_USER_HDFS hdfs
 ENV HADOOP_USER_YARN yarn
 ENV HADOOP_USER_MAPRED mapred
 ENV HADOOP_USER_HTTP HTTP
+ENV HADOOP_USER_TEST abruzzese
+ENV HADOOP_AUTHENTICATION kerberos
 ARG HADOOP_GROUP=hadoop
 ARG group=hadoop
 
@@ -102,6 +104,7 @@ RUN groupadd -g 1001 $HADOOP_GROUP \
 	&& useradd -d /home/$HADOOP_USER_YARN -m -u 1002 -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_YARN $HADOOP_USER_YARN \
 	&& useradd -d /home/$HADOOP_USER_MAPRED -m -u 1003 -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_MAPRED $HADOOP_USER_MAPRED \
 	&& useradd -d /home/$HADOOP_USER_HTTP -m -u 1004 -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_HTTP $HADOOP_USER_HTTP \
+	&& useradd -d /home/$HADOOP_USER_TEST -m -u 1005 -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_TEST $HADOOP_USER_TEST \
 	&& echo 'export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk' > $HADOOP_HOME/etc/hadoop/hadoop-env.sh  \
 	&& echo 'export HDFS_NAMENODE_USER=$HADOOP_USER_HDFS' >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh \
 	&& echo 'export HDFS_DATANODE_USER=$HADOOP_USER_HDFS' >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh \
@@ -189,6 +192,8 @@ RUN cd /tmp/ && \
 
 # Por último dejamos abiertos unos cuantos puertos. En principio no son necesarios todos, pero los dejo así por si en un futuro los necesito.
 EXPOSE 50070 50075 50010 50020 50090 8020 9000 9864 9870 10020 19888 8088 8030 8031 8032 8033 8040 8042 22
+# Mapred ports
+EXPOSE 10020 19888
 
 # start hadoop
 CMD bash $HADOOP_HOME/etc/hadoop/docker-entrypoint.sh
