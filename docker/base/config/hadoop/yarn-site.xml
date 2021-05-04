@@ -15,10 +15,17 @@
 <configuration>
 
 <!-- Site specific YARN configuration properties -->
-
     <property>
         <name>yarn.nodemanager.aux-services</name>
         <value>mapreduce_shuffle</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
+        <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.linux-container-executor.group</name>
+        <value>hadoop</value>
     </property>
     <property>
         <name>yarn.nodemanager.disk-health-checker.max-disk-utilization-per-disk-percentage</name>
@@ -32,6 +39,23 @@
         <name>yarn.nodemanager.resource.memory-mb</name>
         <value>5120</value>
     </property>
+
+    <property>
+        <name>yarn.nodemanager.linux-container-executor.group</name>
+        <value>hadoop</value>
+    </property>
+
+    <property>
+	<name>yarn.nodemanager.linux-container-executor.path</name>
+        <value>/usr/local/hadoop/bin/container-executor</value>
+    </property>
+ 
+    <property>
+        <name>yarn.nodemanager.container-executor.class</name>
+        <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
+    </property>
+
+    <!-- Kerberos -->
     <property>
         <name>yarn.resourcemanager.keytab</name>
         <value>/var/keytabs/yarn.keytab</value> 
@@ -46,6 +70,10 @@
     </property>
     <property>
         <name>yarn.nodemanager.principal</name>
+        <value>yarn/_HOST@EXAMPLE.COM</value>
+    </property>
+    <property>
+        <name>yarn.timeline-service.principal</name>
         <value>yarn/_HOST@EXAMPLE.COM</value>
     </property>
 

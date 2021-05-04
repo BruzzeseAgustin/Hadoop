@@ -27,7 +27,17 @@
     <name>hadoop.security.authentication</name>
     <value>kerberos</value> <!-- A value of "simple" would disable security. -->
   </property>
-  
+
+  <property>
+    <name>hadoop.proxyuser.superuser.hosts</name>
+    <value>*</value> <!-- comma separated hosts from which superuser access are allowed to impersonation. * means wildcard. . -->
+  </property>
+ 
+  <property>
+    <name>hadoop.proxyuser.superuser.groups</name>
+    <value>*</value> <!--  comma separated groups to which users impersonated by superuser belong. * means wildcard. . -->
+  </property>
+ 
   <property>
     <name>hadoop.rpc.protection</name>
     <value>authentication</value> <!--  authentication : authentication only (default); integrity : integrity check in addition to authentication; privacy : data encryption in addition to integrity . -->
@@ -50,4 +60,5 @@
   </property>
 
 </configuration>
+
 

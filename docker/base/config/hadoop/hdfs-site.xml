@@ -6,10 +6,7 @@
         <name>dfs.replication</name>
         <value>1</value>
     </property>
-    <property> 
-        <name>dfs.permissions.enabled</name> 
-        <value>true</value> 
-    </property>
+
   <!--
     Specifies the UNIX group containing users that will be treated as superusers
     by HDFS. You can stick with the value of 'hadoop' or pick your own group
@@ -70,6 +67,10 @@
     <property>
         <name>dfs.datanode.kerberos.principal</name>
         <value>hdfs/_HOST@EXAMPLE.COM</value>
+    </property>
+    <property>
+        <name>dfs.datanode.data.dir.perm</name>
+        <value>700</value>
     </property>
 
     <!-- WebHDFS -->

@@ -30,6 +30,7 @@ RUN pip install -U supervisor
 # Establecer JAVA
 ENV JAVA_HOME /usr/lib/jvm/jre-1.8.0-openjdk 
 
+
 #####################################################################
 
 # Descargar Hadoop
@@ -60,6 +61,7 @@ COPY config/hadoop/hdfs-site.xml $HADOOP_CONF_DIR/hdfs-site.xml
 COPY config/hadoop/yarn-site.xml $HADOOP_CONF_DIR/yarn-site.xml
 COPY config/hadoop/mapred-site.xml $HADOOP_CONF_DIR/mapred-site.xml
 COPY config/hadoop/docker-entrypoint.sh $HADOOP_CONF_DIR/docker-entrypoint.sh
+COPY config/hadoop/container-executor.cfg $HADOOP_CONF_DIR/container-executor.cfg
 
 # La ejecución de Hadoop en modo pseudo-distribuido requiere ssh. 
 # Añade lo siguiente a ~/.ssh/config para evitar tener que confirmar manualmente la conexión
@@ -178,6 +180,15 @@ RUN ssh-keygen -t rsa -P '' -f /etc/ssh/ssh_host_rsa_key \
 	&& cp /home/$HADOOP_USER_YARN/.ssh/id_rsa.pub  /home/$HADOOP_USER_YARN/.ssh/authorized_keys \
 	&& cp /home/$HADOOP_USER_MAPRED/.ssh/id_rsa.pub  /home/$HADOOP_USER_MAPRED/.ssh/authorized_keys \
 	&& echo 'StrictHostKeyChecking no' >> /etc/ssh/ssh_config
+
+
+RUN chown root $HADOOP_CONF_DIR/container-executor.cfg \ 
+	&& chown root:hadoop $HADOOP_HOME/bin/container-executor \
+	&& chown root:hadoop $HADOOP_HOME \
+	&& chown root:hadoop $HADOOP_HOME/etc/ \
+	&& chown root:hadoop $HADOOP_HOME/etc/hadoop \ 
+	&& chmod 755 $HADOOP_HOME/etc/hadoop/*
+
 
 ############################################################
 # Install the JCE

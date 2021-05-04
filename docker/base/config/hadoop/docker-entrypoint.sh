@@ -93,19 +93,19 @@ kinit -kt ${KEYTAB_DIR}/HTTP.keytab HTTP/$(hostname -f)
 kinit -kt ${KEYTAB_DIR}/hdfs.keytab hdfs/$(hostname -f)
 kinit -kt ${KEYTAB_DIR}/abruzzese.keytab abruzzese/$(hostname -f)
 
+# Because of some permissions checks, the container-executor binary needs to be in a path owned by root. As root, do the following:
+sudo chmod 6050 $HADOOP_HOME/bin/container-executor 
+sudo chmod 755 /usr/local/hadoop
+sudo chmod 755 /usr/local/hadoop/etc/  
+sudo chown root /usr/local/hadoop/etc/hadoop
+sudo chmod 755 /usr/local/hadoop/etc/hadoop 
+sudo chmod 755 -R /usr/local/hadoop/etc/hadoop
+sudo chmod 755 /usr/local/hadoop/etc/hadoop/*
+
 echo 'Y' | sudo -E -u hdfs $HADOOP_HOME/bin/hdfs namenode -format 
 
 # Start HDFS, YARM, and MAPREDUCE daemons
 supervisord
-
-sudo chmod -R 777 /usr/local/hadoop
-# Create tmp folder 
-# hdfs dfs -mkdir /tmp
-# hdfs dfs -chmod 777 /tmp
-# hdfs dfs -mkdir /user
-# hdfs dfs -chmod 777 /user
-# hdfs dfs -mkdir /apps
-# hdfs dfs -chmod 777 /apps
 
 # keep container running
 tail -f /dev/null

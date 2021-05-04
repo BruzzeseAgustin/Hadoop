@@ -1,14 +1,20 @@
 <?xml version="1.0"?>
 <configuration>
-
+  <!--
+    If you plan on running YARN, you must set this property to the value of yarn.
+  -->
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+    </property>
 
   <!--
     The staging dir used while submitting jobs.
   -->
-  <property>
-    <name>yarn.app.mapreduce.am.staging-dir</name>
-    <value>/tmp/hadoop-yarn/staging</value>
-  </property>
+    <property>
+        <name>yarn.app.mapreduce.am.staging-dir</name>
+        <value>/tmp/hadoop-yarn/staging</value>
+    </property>
 
   <!--
     The maximum size of user-logs of each task in KB.
@@ -76,6 +82,16 @@
          <name>mapreduce.jobhistory.webapp.https.address</name>
          <value>localhost:19889</value>
     </property> 
+
+    <property>
+      <name>yarn.resourcemanager.principal</name>
+      <value>yarn/_HOST@EXAMPLE.COM</value>
+    </property>
+
+    <property>
+        <name>dfs.namenode.kerberos.principal</name>
+        <value>hdfs/_HOST@EXAMPLE.COM</value>
+    </property>
      
     <property>
          <name>mapreduce.jobhistory.webapp.spnego-keytab-file</name>
@@ -138,7 +154,7 @@
 
     <property>
         <name>mapreduce.reduce.shuffle.memory.limit.percent</name>
-        <value>0.20</value>
+        <value>0.2</value>
   	<description>
 	Reduce Task - Fetcher
   	</description>
@@ -146,7 +162,7 @@
 
     <property>
         <name>mapreduce.reduce.shuffle.input.buffer.percent</name>
-        <value>0.70</value>
+        <value>0.50</value>
   	<description>
 	Reduce Task 
   	</description>
