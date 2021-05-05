@@ -18,6 +18,7 @@ RUN yum -y install epel-release \
 	java-1.8.0-openjdk-headless \
 	wget \
 	nano \
+	git \
         && \
     yum clean all && \
     rm -rf /var/cache/yum/*
@@ -71,6 +72,69 @@ COPY config/hadoop/container-executor.cfg $HADOOP_CONF_DIR/container-executor.cf
 COPY config/hadoop/ssh_config /etc/ssh/ssh_config
 
 RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && chmod 0600 ~/.ssh/authorized_keys
+
+#####################################################################
+#####################################################################
+
+# Build HIVE and TEZ 
+
+#####################################################################
+
+# Descargar maven
+
+# 1- Define a constant with the version of maven you want to install
+ARG MAVEN_VERSION=3.2.2
+    
+# 2- Define the URL where maven can be downloaded from
+RUN curl -s http://mirror.olnevhost.net/pub/apache/maven/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz | tar -xz -C /usr/local/
+
+RUN cd /usr/local && ln -s apache-maven-${MAVEN_VERSION} maven
+ENV MAVEN_HOME /usr/local/maven
+ENV PATH $MAVEN_HOME/bin:$PATH
+
+# Descargar Protoc-compiler
+
+ARG PROTOBUF_VERSION=4.0.x 
+RUN yum install autoconf automake libtool gcc-c++ make -y
+RUN git clone https://github.com/protocolbuffers/protobuf.git --branch ${PROTOBUF_VERSION} --single-branch --depth 1 /tmp/protobuf \
+	&& cd /tmp/protobuf \
+	&& ./autogen.sh \
+	&& ./configure --prefix=/usr \
+	&& make \
+	&& make check \
+	&& make install \
+	&& ldconfig
+
+# Descargar HIVE
+
+# clone and compile hive
+ENV HIVE_VERSION 1.2.0
+ENV HIVE_SNAPSHOT_VERSION ${HIVE_VERSION}-SNAPSHOT
+RUN cd /usr/local && git clone https://github.com/apache/hive.git
+RUN cd /usr/local/hive && /usr/local/maven/bin/mvn clean install -DskipTests -Phadoop-2,dist
+RUN mkdir /usr/local/hive-dist && tar -xf /usr/local/hive/packaging/target/apache-hive-${HIVE_SNAPSHOT_VERSION}-bin.tar.gz -C /usr/local/hive-dist
+
+
+#####################################################################
+
+# Descargar Tez
+
+ARG TEZ_VERSION=0.10.0
+ENV TEZ_CONF_DIR=/etc/tez/conf
+ENV TEZ_LIB_DIR=/opt/tez
+
+ENV TEZ_DIST /usr/local/tez/tez-dist/target/tez-${TEZ_VERSION}
+RUN cd /usr/local && git clone https://github.com/apache/tez.git
+
+COPY config/hadoop/tez-site.xml /opt/tez/conf/
+#####################################################################
+
+# set hive environment
+ENV HIVE_HOME /usr/local/hive-dist/apache-hive-${HIVE_SNAPSHOT_VERSION}-bin
+ENV HIVE_CONF $HIVE_HOME/conf
+ENV PATH $HIVE_HOME/bin:$PATH
+ADD hive-site.xml $HIVE_CONF/hive-site.xml
+ADD hive-log4j.properties $HIVE_CONF/hive-log4j.properties
 
 #####################################################################
 
