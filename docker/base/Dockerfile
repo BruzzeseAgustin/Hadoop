@@ -123,11 +123,14 @@ RUN curl -fSL "https://github.com/protocolbuffers/protobuf/releases/download/v${
 
 # Descargar Tez
 
+# to run bower as root
+RUN echo '{ "allow_root": true }' > /root/.bowerrc
+
 RUN curl -fSL https://downloads.apache.org/tez/${TEZ_VERSION}/apache-tez-${TEZ_VERSION}-src.tar.gz -o /tmp/tez.tar.gz \
 	&& mkdir -pv ${TEZ_CONF_DIR} \
 	&& tar -xvf /tmp/tez.tar.gz -C ${TEZ_LIB_DIR} \
 	&& cd /opt/tez/apache-tez-${TEZ_VERSION}-src  \
-	&& mvn clean package -DskipTests=true -Dmaven.javadoc.skip=true --projects "!tez-ui" \
+	&& mvn clean package -DskipTests=true -Dmaven.javadoc.skip=true \
 	&& mkdir -pv ${TEZ_HOME_DIR} \
 	&& mv ${TEZ_LIB_DIR}/apache-tez-${TEZ_VERSION}-src/tez-dist/target/tez-${TEZ_VERSION}-minimal.tar.gz ${TEZ_HOME_DIR}/tez.tar.gz \
 	&& ls -l ${TEZ_HOME_DIR}
