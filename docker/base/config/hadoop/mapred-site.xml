@@ -5,7 +5,7 @@
   -->
     <property>
         <name>mapreduce.framework.name</name>
-        <value>yarn</value>
+        <value>yarn-tez</value>
     </property>
 
   <!--
@@ -149,30 +149,6 @@
 	 where VARNAME is the name of the environment variable. This is the only
 	 way to add a variable when its value contains commas.
 	 contains commas.
-  	</description>
-    </property>
-
-    <property>
-        <name>mapreduce.reduce.shuffle.memory.limit.percent</name>
-        <value>0.2</value>
-  	<description>
-	Reduce Task - Fetcher
-  	</description>
-    </property>
-
-    <property>
-        <name>mapreduce.reduce.shuffle.input.buffer.percent</name>
-        <value>0.50</value>
-  	<description>
-	Reduce Task 
-  	</description>
-    </property>
-
-    <property>
-        <name>mapreduce.reduce.shuffle.parallelcopies</name>
-        <value>4</value>
-  	<description>
-	Reduce Task 
   	</description>
     </property>
 

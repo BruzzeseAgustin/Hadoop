@@ -13,11 +13,19 @@ RUN yum -y install epel-release \
         rsync \
         software-properties-common \
         unzip \
+	bzip2 \
 	openssh-server \
 	less \
-	java-1.8.0-openjdk-headless \
+	java-11-openjdk-devel \ 
+	autoconf \
+	libtool \
+	make \
+	gcc-c++ \
+	g++ \ 
+	unzip \
 	wget \
 	nano \
+	git \
         && \
     yum clean all && \
     rm -rf /var/cache/yum/*
@@ -28,8 +36,7 @@ RUN pip install -U supervisor
 # la ruta en la que hemos copiado Hadoop e incluimos en la variable PATH las rutas con los binarios y # scripts para gestionar Hadoop.
 
 # Establecer JAVA
-ENV JAVA_HOME /usr/lib/jvm/jre-1.8.0-openjdk 
-
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk
 
 #####################################################################
 
@@ -41,17 +48,17 @@ ENV HADOOP_URL https://www.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/
 ENV HADOOP_CONF_DIR $HADOOP_HOME/etc/hadoop
 
 RUN set -x \
-    && wget -q "$HADOOP_URL" -O /tmp/hadoop.tar.gz \
-    && tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
-    && mv /tmp/hadoop-$HADOOP_VERSION $HADOOP_HOME \
-    && echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_CONF_DIR/hadoop-env.sh \
-    && echo "PATH=$PATH:$HADOOP_HOME/bin" >> ~/.bashrc
+	&& wget -q "$HADOOP_URL" -O /tmp/hadoop.tar.gz \
+	&& tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
+	&& mv /tmp/hadoop-$HADOOP_VERSION $HADOOP_HOME \
+	&& echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_CONF_DIR/hadoop-env.sh \
+	&& echo "PATH=$PATH:$HADOOP_HOME/bin" >> ~/.bashrc
 
 # COPY zip/hadoop.tar.gz /tmp/hadoop.tar.gz
 # RUN tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
-#     && mv /tmp/hadoop-$HADOOP_VERSION $HADOOP_HOME \
-#     && echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_CONF_DIR/hadoop-env.sh \
-#     && echo "PATH=$PATH:$HADOOP_HOME/bin" >> ~/.bashrc
+#	&& mv /tmp/hadoop-$HADOOP_VERSION $HADOOP_HOME \
+#	&& echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_CONF_DIR/hadoop-env.sh \
+#	&& echo "PATH=$PATH:$HADOOP_HOME/bin" >> ~/.bashrc
 
 # Copiamos los ficheros de configuración y scripts que tenemos en el directorio config al directorio de hadoop
 # Más adelante debería explicar cada fichero y su contenido...
@@ -71,6 +78,78 @@ COPY config/hadoop/container-executor.cfg $HADOOP_CONF_DIR/container-executor.cf
 COPY config/hadoop/ssh_config /etc/ssh/ssh_config
 
 RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && chmod 0600 ~/.ssh/authorized_keys
+
+#####################################################################
+#####################################################################
+
+# Build HIVE and TEZ 
+
+#####################################################################
+
+# Set environment
+
+ENV MAVEN_VERSION=3.6.3
+ENV PROTOBUF_VERSION=2.5.0
+ENV TEZ_VERSION=0.10.0
+ENV HIVE_VERSION=3.1.2
+ENV HIVE_DOWNLOAD_DIR=/tmp/hive
+ENV POSTGRESQL_JDBC_VERSION=42.2.14
+ENV TEZ_HOME_DIR=/app/tez/
+ENV TEZ_LIB_DIR=/opt/tez/
+ENV TEZ_CONF_DIR=/opt/tez/conf
+ENV TEZ_HOME=/opt/tez 
+ENV HADOOP_CLASSPATH=/opt/tez/conf:/opt/tez/*:/opt/tez/lib/
+
+# Descargar maven
+# RUN yum install -y maven # this way is not recommended
+RUN curl -fSL https://www-eu.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz --output apache-maven-${MAVEN_VERSION}-bin.tar.gz \ 
+	&& tar xvf apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /usr/local/ \
+	&& mv /usr/local/apache-maven-${MAVEN_VERSION} /usr/local/maven \
+	&& ln -s apache-maven-${MAVEN_VERSION} /usr/local/ 
+
+ENV MAVEN_HOME /usr/local/maven
+ENV PATH $MAVEN_HOME/bin:$PATH
+
+# Descargar Protoc-compiler
+
+RUN curl -fSL "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOBUF_VERSION}/protobuf-${PROTOBUF_VERSION}.tar.gz" --output protobuf-${PROTOBUF_VERSION}.tar.gz \
+	&& tar -xvf protobuf-${PROTOBUF_VERSION}.tar.gz \
+	&& cd protobuf-${PROTOBUF_VERSION} \
+	&& ./autogen.sh \
+	&& ./configure --prefix=/usr/local \
+	&& make \
+	&& make install \
+	&& ldconfig
+
+# Descargar Tez
+
+RUN curl -fSL https://downloads.apache.org/tez/${TEZ_VERSION}/apache-tez-${TEZ_VERSION}-src.tar.gz -o /tmp/tez.tar.gz \
+	&& mkdir -pv ${TEZ_CONF_DIR} \
+	&& tar -xvf /tmp/tez.tar.gz -C ${TEZ_LIB_DIR} \
+	&& cd /opt/tez/apache-tez-${TEZ_VERSION}-src  \
+	&& mvn clean package -DskipTests=true -Dmaven.javadoc.skip=true --projects "!tez-ui" \
+	&& mkdir -pv ${TEZ_HOME_DIR} \
+	&& mv ${TEZ_LIB_DIR}/apache-tez-${TEZ_VERSION}-src/tez-dist/target/tez-${TEZ_VERSION}-minimal.tar.gz ${TEZ_HOME_DIR}/tez.tar.gz \
+	&& ls -l ${TEZ_HOME_DIR}
+
+COPY config/hadoop/tez-site.xml ${TEZ_CONF_DIR}
+
+#####################################################################
+
+# Descargar HIVE
+
+# Install Hive and PostgreSQL JDBC
+# RUN curl -fSL https://archive.apache.org/dist/hive/hive-$HIVE_VERSION/apache-hive-$HIVE_VERSION-bin.tar.gz -o /tmp/hive.tar.gz \
+COPY zip/hive.tar.gz /tmp/hive.tar.gz
+RUN mkdir -pv $HIVE_DOWNLOAD_DIR \
+    && mkdir -pv $TEZ_CONF_DIR \
+    && tar -xvf /tmp/hive.tar.gz -C $HIVE_DOWNLOAD_DIR --strip-components=1 \
+    && mv -v $HIVE_DOWNLOAD_DIR /opt \
+    && rm -rfv /tmp/hive.tar.gz \
+    && rm -rfv $HIVE_HOME/lib/guava-*.jar \
+    && cp $HADOOP_HOME/share/hadoop/common/lib/guava-*.jar $HIVE_HOME/lib/ \
+    && rm -rfv $HIVE_HOME/lib/postgresql-*.jre*.jar \
+    && curl -fSL https://jdbc.postgresql.org/download/postgresql-$POSTGRESQL_JDBC_VERSION.jar -o $HIVE_HOME/lib/postgresql-jdbc.jar
 
 #####################################################################
 
@@ -107,7 +186,7 @@ RUN groupadd -g 1001 $HADOOP_GROUP \
 	&& useradd -d /home/$HADOOP_USER_MAPRED -m -u 1003 -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_MAPRED $HADOOP_USER_MAPRED \
 	&& useradd -d /home/$HADOOP_USER_HTTP -m -u 1004 -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_HTTP $HADOOP_USER_HTTP \
 	&& useradd -d /home/$HADOOP_USER_TEST -m -u 1005 -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_TEST $HADOOP_USER_TEST \
-	&& echo 'export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk' > $HADOOP_HOME/etc/hadoop/hadoop-env.sh  \
+	# && echo 'export JAVA_HOME=/usr/lib/jvm/java-11-openjdk' > $HADOOP_HOME/etc/hadoop/hadoop-env.sh  \
 	&& echo 'export HDFS_NAMENODE_USER=$HADOOP_USER_HDFS' >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh \
 	&& echo 'export HDFS_DATANODE_USER=$HADOOP_USER_HDFS' >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh \
 	&& echo 'export HDFS_SECONDARYNAMENODE_USER=$HADOOP_USER_HDFS' >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh \
@@ -189,9 +268,10 @@ RUN chown root $HADOOP_CONF_DIR/container-executor.cfg \
 	&& chown root:hadoop $HADOOP_HOME/etc/hadoop \ 
 	&& chmod 755 $HADOOP_HOME/etc/hadoop/*
 
-
 ############################################################
+
 # Install the JCE
+
 RUN cd /tmp/ && \
    curl -LO "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip" -H 'Cookie: oraclelicense=accept-securebackup-cookie' && \
    unzip jce_policy-8.zip && \
