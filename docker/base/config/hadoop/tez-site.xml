@@ -23,5 +23,10 @@
         <name>tez.task.resource.memory.mb</name>
         <value>4096</value>
     </property>
+    <property>
+         <description>URL for where the Tez UI is hosted</description>
+         <name>tez.tez-ui.history-url.base</name>
+         <value>http://localhost:9999/tez-ui/</value>
+  </property>
 </configuration>
 

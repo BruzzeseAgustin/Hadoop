@@ -94,10 +94,10 @@ ENV TEZ_VERSION=0.10.0
 ENV HIVE_VERSION=3.1.2
 ENV HIVE_DOWNLOAD_DIR=/tmp/hive
 ENV POSTGRESQL_JDBC_VERSION=42.2.14
-ENV TEZ_HOME_DIR=/app/tez/
-ENV TEZ_LIB_DIR=/opt/tez/
+ENV TEZ_HDP_DIR=/app/tez
+ENV TEZ_HOME_DIR=/opt/tez
+ENV TEZ_LIB_DIR=/opt/tez/lib
 ENV TEZ_CONF_DIR=/opt/tez/conf
-ENV TEZ_HOME=/opt/tez 
 ENV HADOOP_CLASSPATH=/opt/tez/conf:/opt/tez/*:/opt/tez/lib/
 
 # Descargar maven
@@ -128,12 +128,14 @@ RUN echo '{ "allow_root": true }' > /root/.bowerrc
 
 RUN curl -fSL https://downloads.apache.org/tez/${TEZ_VERSION}/apache-tez-${TEZ_VERSION}-src.tar.gz -o /tmp/tez.tar.gz \
 	&& mkdir -pv ${TEZ_CONF_DIR} \
-	&& tar -xvf /tmp/tez.tar.gz -C ${TEZ_LIB_DIR} \
-	&& cd /opt/tez/apache-tez-${TEZ_VERSION}-src  \
+	&& mkdir -pv ${TEZ_HDP_DIR} \
+	&& tar -xvf /tmp/tez.tar.gz -C /tmp/ \
+	&& cd /tmp/apache-tez-${TEZ_VERSION}-src  \
 	&& mvn clean package -DskipTests=true -Dmaven.javadoc.skip=true \
-	&& mkdir -pv ${TEZ_HOME_DIR} \
-	&& mv ${TEZ_LIB_DIR}/apache-tez-${TEZ_VERSION}-src/tez-dist/target/tez-${TEZ_VERSION}-minimal.tar.gz ${TEZ_HOME_DIR}/tez.tar.gz \
-	&& ls -l ${TEZ_HOME_DIR}
+	&& cp -r /tmp/apache-tez-${TEZ_VERSION}-src/tez-dist/target/tez-${TEZ_VERSION}-minimal.tar.gz ${TEZ_HOME_DIR}/tez.tar.gz \
+	&& tar -xvf ${TEZ_HOME_DIR}/tez.tar.gz -C ${TEZ_HOME_DIR}/ \
+	&& mv /tmp/apache-tez-${TEZ_VERSION}-src/tez-dist/target/tez-${TEZ_VERSION}-minimal.tar.gz ${TEZ_HDP_DIR}/tez.tar.gz \
+	&& echo "HADOOP_CLASSPATH=/opt/tez/conf:/opt/tez/*:/opt/tez/lib/*" >> ~/.bashrc
 
 COPY config/hadoop/tez-site.xml ${TEZ_CONF_DIR}
 
@@ -288,6 +290,7 @@ RUN cd /tmp/ && \
 EXPOSE 50070 50075 50010 50020 50090 8020 9000 9864 9870 10020 19888 8088 8030 8031 8032 8033 8040 8042 22
 # Mapred ports
 EXPOSE 10020 19888
-
+# Tez ports
+EXPOSE 9999
 # start hadoop
 CMD bash $HADOOP_HOME/etc/hadoop/docker-entrypoint.sh
