@@ -50,18 +50,18 @@ ENV HADOOP_VERSION 3.2.2
 ENV HADOOP_URL https://www.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz
 ENV HADOOP_CONF_DIR $HADOOP_HOME/etc/hadoop
 
-# RUN set -x \
-# 	&& wget -q "$HADOOP_URL" -O /tmp/hadoop.tar.gz \
-# 	&& tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
-# 	&& mv /tmp/hadoop-$HADOOP_VERSION $HADOOP_HOME \
-# 	&& echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_CONF_DIR/hadoop-env.sh \
-# 	&& echo "PATH=$PATH:$HADOOP_HOME/bin" >> ~/.bashrc
-
-COPY zip/hadoop.tar.gz /tmp/hadoop.tar.gz
-RUN tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
+RUN set -x \
+	&& wget -q "$HADOOP_URL" -O /tmp/hadoop.tar.gz \
+	&& tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
 	&& mv /tmp/hadoop-$HADOOP_VERSION $HADOOP_HOME \
 	&& echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_CONF_DIR/hadoop-env.sh \
 	&& echo "PATH=$PATH:$HADOOP_HOME/bin" >> ~/.bashrc
+
+# COPY zip/hadoop.tar.gz /tmp/hadoop.tar.gz
+# RUN tar -xzf /tmp/hadoop.tar.gz -C /tmp/ \
+# 	&& mv /tmp/hadoop-$HADOOP_VERSION $HADOOP_HOME \
+# 	&& echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_CONF_DIR/hadoop-env.sh \
+# 	&& echo "PATH=$PATH:$HADOOP_HOME/bin" >> ~/.bashrc
 
 # Copiamos los ficheros de configuración y scripts que tenemos en el directorio config al directorio de hadoop
 # Más adelante debería explicar cada fichero y su contenido...
@@ -282,7 +282,7 @@ RUN chown root $HADOOP_CONF_DIR/container-executor.cfg \
 
 # Install the JCE
 
-RUN cd /tmp/ && \
+RUN cd /tmp/ \
 	&& mkdir -p /usr/lib/security/ \
 	&& curl -LO "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip" -H 'Cookie: oraclelicense=accept-securebackup-cookie' \
 	&& unzip jce_policy-8.zip \

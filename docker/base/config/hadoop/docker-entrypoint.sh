@@ -107,5 +107,8 @@ echo 'Y' | sudo -E -u hdfs $HADOOP_HOME/bin/hdfs namenode -format
 # Start HDFS, YARM, and MAPREDUCE daemons
 supervisord
 
+hdfs dfs -mkdir -p /apps/tez
+hadoop fs -copyFromLocal $TEZ_HOME_DIR/tez.tar.gz /apps/tez/tez.tar.gz
+
 # keep container running
 tail -f /dev/null
