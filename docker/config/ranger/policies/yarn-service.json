@@ -1,0 +1,15 @@
+{
+   "configs":{
+      "password":"s3cUr1tyr4Ng3r",
+      "username":"rangerlookup",
+      "tag.download.auth.users":"yarn",
+      "policy.download.auth.users":"yarn",
+      "hadoop.security.authentication":"kerberos",
+      "password":"s3cUr1tyr4Ng3r",
+      "yarn.url":"http://localhost:8088"
+   },
+   "type":"yarn",
+   "name":"yarndev",
+   "displayName":"yarndev",
+   "description":"yarn service manager"
+}

@@ -1,0 +1,14 @@
+{
+   "type":"hive",
+   "name":"hivedev",
+   "displayName":"hivedev",
+   "description":"",
+   "configs":{
+      "password":"s3cUr1tyr4Ng3r",
+      "jdbc.driverClassName":"org.apache.hive.jdbc.HiveDriver",
+      "jdbc.url":"jdbc:hive2://localhost:10000/default;principal=hive/_HOST@EXAMPLE.COM",
+      "username":"rangerlookup",
+      "tag.download.auth.users":"hive",
+      "policy.download.auth.users":"hive"
+   }
+}

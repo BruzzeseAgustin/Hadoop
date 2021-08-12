@@ -1,0 +1,562 @@
+FROM centos:7
+
+USER root
+
+RUN yum -y install epel-release \
+	&& yum upgrade -y \
+	&& yum -y install curl \
+	ssh \
+	bash-completion \
+	sudo \ 
+        rsync \
+        software-properties-common \
+        unzip \
+	bzip2 \
+	openssh-server \
+	less \
+	java-1.8.0-openjdk \
+	java-1.8.0-openjdk-headless \
+	java-1.8.0-openjdk-devel \
+	postgresql-server \
+	postgresql-contrib \
+	postgresql-jdbc* \
+	mysql-connector-java \
+	mysql-server \
+        krb5-server \
+        krb5-workstation \
+	krb5-libs \ 
+	krb5-auth-dialog \
+	python3 \
+	autoconf \
+	libtool \
+	make \
+	gcc-c++ \
+	mlocate \
+	netstat \
+	g++ \ 
+	jq \
+	unzip \
+	wget \
+	nano \
+	iproute \
+	git \
+	which \
+	net-tools \
+	ruby \
+	tree \
+	snappy \
+        && yum clean all \
+    	&& rm -rf /var/cache/yum/* \
+	&& yum upgrade -y \
+	&& yum -y install --enablerepo="epel" python-pip \
+	jq \
+	&& pip install -U supervisor \
+	&& pip install -U requests \
+	&& yum clean all \
+	&& rm -rf /var/cache/yum/* 
+
+ADD config/supervisord/ /etc/
+#####################################################################
+
+# Configuración para hadoop
+
+# Los usuarios deberían ser menores a 1000 
+ENV HADOOP_USER_HDFS=hdfs \ 
+	HADOOP_USER_YARN=yarn \ 
+	HADOOP_USER_MAPRED=mapred \ 
+	HADOOP_USER_HTTP=HTTP \ 
+	HADOOP_USER_HIVE=hive \ 
+	HADOOP_USER_RANGER=ranger \ 
+	HADOOP_USER_RANGERLOOKUP=rangerlookup \ 
+	HADOOP_USER_SOLR=solr \ 
+	HADOOP_USER_SPARK=spark \ 
+	HADOOP_USER_HBASE=hbase \ 
+	HADOOP_USER_ATLAS=atlas \ 
+	HADOOP_USER_ZKEEPER=zookeeper \ 
+	HADOOP_AUTHENTICATION=kerberos \ 
+	HADOOP_USER=abruzzese \ 
+	HADOOP_USER_TEST_1=tallada \ 
+	HADOOP_USER_TEST_2=jcarrete \ 
+	HADOOP_GROUP=hadoop
+
+RUN groupadd $HADOOP_GROUP \ 
+	&& useradd -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_HDFS $HADOOP_USER_HDFS \
+	&& useradd -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_YARN $HADOOP_USER_YARN \
+	&& useradd -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_MAPRED $HADOOP_USER_MAPRED \
+	&& useradd -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_HTTP $HADOOP_USER_HTTP \
+	&& useradd -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER $HADOOP_USER \
+	&& useradd -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_HIVE $HADOOP_USER_HIVE \
+	&& useradd -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_RANGER $HADOOP_USER_RANGER \
+	&& useradd -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_RANGERLOOKUP $HADOOP_USER_RANGERLOOKUP \
+	&& useradd -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_SOLR $HADOOP_USER_SOLR \
+	&& useradd -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_SPARK $HADOOP_USER_SPARK \
+	&& useradd -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_HBASE $HADOOP_USER_HBASE \
+	&& useradd -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_ATLAS $HADOOP_USER_ATLAS \
+	&& useradd -g $HADOOP_GROUP -s /bin/bash -p $HADOOP_USER_ZKEEPER $HADOOP_USER_ZKEEPER \
+	&& useradd -s /bin/bash -p $HADOOP_USER_TEST_1 $HADOOP_USER_TEST_1 \	
+	&& useradd -s /bin/bash -p $HADOOP_USER_TEST_2 $HADOOP_USER_TEST_2
+
+#####################################################################
+
+# Descargar Hadoop
+ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.302.b08-0.el7_9.x86_64 \
+	HADOOP_HOME=/usr/local/hadoop \
+	HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop
+
+RUN echo "export JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which javac)))))" | tee -a ~/.bashrc && source ~/.bashrc && export JAVA_HOME=$JAVA_HOME
+
+# Downloaded from ENV HADOOP_URL https://www.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz
+
+ADD --chown=root:hadoop dependencies/hadoop-* /zip/hadoop
+ 
+RUN mkdir -p ${HADOOP_HOME} \
+	&& ln -s /zip/hadoop/* ${HADOOP_HOME} \
+	&& echo "export JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which javac)))))" >> ${HADOOP_CONF_DIR}/hadoop-env.sh \
+	&& mkdir -p /var/log/hadoop-hdfs/ \ 
+	&& mkdir -p /var/log/hadoop-yarn/ \
+	&& mkdir -p /var/log/hadoop-mapreduce/ \
+	&& echo "export HDFS_NAMENODE_USER=$HADOOP_USER_HDFS" >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh \
+	&& echo "export HDFS_DATANODE_USER=$HADOOP_USER_HDFS" >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh \
+	&& echo "export HDFS_SECONDARYNAMENODE_USER=$HADOOP_USER_HDFS" >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh \
+	&& source $HADOOP_HOME/etc/hadoop/hadoop-env.sh \
+	&& mkdir -p /dfs/name \
+	&& mkdir -p /dfs/data \ 
+	&& chown -R hdfs:hadoop /dfs \
+	&& mkdir -p $HADOOP_HOME/logs \
+	&& chown hdfs:hadoop $HADOOP_HOME/logs \
+	&& chmod -R 777 ${HADOOP_HOME}/logs \ 
+	&& chmod 6050 $HADOOP_HOME/bin/container-executor 
+
+# Copiamos los ficheros de configuración y scripts que tenemos en el directorio config al directorio de hadoop
+
+ADD config/hadoop/ $HADOOP_CONF_DIR/
+ADD config/tools/ /opt/tools/
+
+ENV PATH="${HADOOP_HOME}/bin:${HADOOP_HOME}/sbin:${PATH}" \
+	CLASSPATH="${HADOOP_HOME}/lib/*" \
+	HADOOP_CLASSPATH="${HADOOP_HOME}/lib/*" 
+
+############################################################
+
+## KERBEROS VARIABLES
+
+# REALM 	the Kerberos realm 
+# DOMAIN_REALM 	the DNS domain for the realm
+# KERB_MASTER_KEY 	master key for the KDC
+# KERB_ADMIN_USER 	administrator account name
+# KERB_PRINCIPAL_USER
+# KERBEROS_ADMIN_PASSWORD administrator account pass
+# KEYTAB_DIR 
+# config kerberos
+# ADD config/kerberos/kdb.conf /var/lib/krb5kdc/kdb.conf
+# ADD config/kerberos/kdc.conf /var/kerberos/krb5kdc/kdc.conf
+
+ENV KRB_REALM=EXAMPLE.COM \
+	DOMAIN_REALM=example.com \ 
+	KERB_MASTER_KEY=masterkey \ 
+	KERBEROS_ADMIN=root \ 
+	KERB_PRINCIPAL_USER=root/admin \ 
+	KERBEROS_ADMIN_PASSWORD=admin \ 
+	KEYTAB_DIR=/var/keytabs 
+
+RUN mkdir -pv ${KEYTAB_DIR} \
+	&& mkdir -pv /tmp/hadoop-yarn/staging/history/done \
+	&& mkdir -pv /tmp/hadoop-yarn-yarn/staging/history/done \
+	&& mkdir -pv /usr/local/hadoop/logs/userlogs \ 
+	&& mkdir -pv /logs \
+	&& mkdir -p /var/log/hadoop-krb/ \
+	&& chown -R yarn:hadoop /usr/local/hadoop/logs/userlogs \
+	&& chmod -R 775 /usr/local/hadoop/logs \
+	&& chmod 755 /usr/local/hadoop \
+	&& chmod 755 /usr/local/hadoop/etc/hadoop \
+	&& chmod 755 -R /usr/local/hadoop/etc/hadoop \
+	&& chmod 755 /usr/local/hadoop/etc/hadoop/* \
+	&& chmod 755 /usr/local/hadoop/etc/ \
+	&& chown -R  hdfs:hadoop /tmp/ \
+	&& chown -R  yarn:hadoop /tmp/hadoop-yarn-yarn/ \
+	&& chown -R  yarn:hadoop /tmp/hadoop-yarn/ \
+	&& chgrp -R hadoop -R /tmp/ \ 
+	&& chown root:hadoop $HADOOP_CONF_DIR/container-executor.cfg \ 
+	&& chown root:hadoop $HADOOP_HOME/bin/container-executor \
+	&& chown root:hadoop $HADOOP_HOME \
+	&& chown root:hadoop $HADOOP_HOME/etc/ \
+	&& chown root:hadoop -R $HADOOP_HOME/etc/hadoop \ 
+	&& chmod 755 $HADOOP_HOME/etc/hadoop/* \
+	&& chmod -R 1777 /tmp  \
+	&& chmod -R 1777 /logs 
+
+############################################################
+
+# Install the JCE
+
+RUN cd /tmp/ \
+	&& mkdir -p /usr/lib/security/ \
+	&& mkdir -p $(dirname $(dirname $(readlink $(readlink $(which javac)))))/lib/security/ \
+	&& curl -LO "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip" -H 'Cookie: oraclelicense=accept-securebackup-cookie' \
+	&& unzip jce_policy-8.zip \
+	&& rm jce_policy-8.zip \
+	&& yes |cp -v /tmp/UnlimitedJCEPolicyJDK8/*.jar $(dirname $(dirname $(readlink $(readlink $(which javac)))))/lib/security/
+
+#####################################################################
+#####################################################################
+
+# Build HIVE and TEZ 
+
+#####################################################################
+
+# Set environment
+
+ENV HIVE_DOWNLOAD_DIR=/tmp/hive \
+	POSTGRESQL_JDBC_VERSION=42.2.20
+
+ENV MYSQL_CONNECTOR_JAVA_VERSION=${MYSQL_CONNECTOR_JAVA_VERSION:-8.0.21} \
+	HIVE_HOME=/usr/local/hive \
+	HIVE_CONF_DIR=/usr/local/hive/conf \
+	TEZ_HDP_DIR=/apps/tez \
+	TEZ_HOME=/usr/local/tez \
+	TEZ_LIB_DIR=/usr/local/tez/lib \
+	TEZ_CONF_DIR=/usr/local/tez/conf
+
+# Downloaded from ENV TEZ_URL=https://downloads.apache.org/tez/${TEZ_VERSION}/apache-tez-${TEZ_VERSION}-bin.tar.gz 
+
+ADD dependencies/tez/apache-tez-*-bin /tmp/tez
+
+# to run bower as root
+RUN echo '{ "allow_root": true }' > /root/.bowerrc \
+	&& mkdir -pv ${TEZ_HOME} \
+	&& ln -s /tmp/tez/* ${TEZ_HOME}/ \ 
+	&& mkdir -p /var/log/hadoop-tez/ \
+	&& wget https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-runner/9.2.11.v20150529/jetty-runner-9.2.11.v20150529.jar -O ${TEZ_HOME}/jetty-runner.jar
+
+ADD config/tez/ ${TEZ_CONF_DIR}/
+ADD dependencies/tez/tez-ui-*.war ${TEZ_HOME}/
+
+#####################################################################
+
+# Install Hive 
+
+# Downloaded from curl -fSL https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz -o /tmp/hive.tar.gz \
+
+ENV PATH=${PATH}:${HIVE_HOME}/bin \
+	TEZ_JARS=${TEZ_HOME}/*:${TEZ_HOME}/lib/*
+
+# Hive needs /tmp/hive with permissions in order to write /tmp/hive/hive.pid 
+ADD --chown=hive:hadoop dependencies/hive/apache-hive-*-bin /tmp/hive 
+
+# Add the HADOOP_HOME variable and the full path to your Hadoop directory, Install PSQL, and Creating a Database Cluster
+RUN mkdir -pv ${HIVE_DOWNLOAD_DIR} \
+	&& mkdir -pv ${HIVE_HOME} \
+	&& ln -s /tmp/hive/* ${HIVE_HOME} \ 
+	&& cp ${HADOOP_HOME}/share/hadoop/common/lib/guava-*.jar ${HIVE_HOME}/lib/ \
+	&& wget https://jdbc.postgresql.org/download/postgresql-9.4.1212.jar -O ${HIVE_HOME}/lib/postgresql-jdbc.jar \
+	&& wget https://jdbc.postgresql.org/download/postgresql-${POSTGRESQL_JDBC_VERSION}.jar -O ${HIVE_HOME}/lib/postgresql-jdbc.jar \
+	&& wget https://repo1.maven.org/maven2/mysql/mysql-connector-java/$MYSQL_CONNECTOR_JAVA_VERSION/mysql-connector-java-$MYSQL_CONNECTOR_JAVA_VERSION.jar -O $HIVE_HOME/lib/mysql-connector-java-$MYSQL_CONNECTOR_JAVA_VERSION.jar \
+	&& mv ${HIVE_CONF_DIR}/hive-env.sh.template ${HIVE_CONF_DIR}/hive-env.sh \ 	
+	&& echo "export HIVE_HOME=${HIVE_HOME}" >> ${HIVE_CONF_DIR}/hive-env.sh \
+	&& echo "export HIVE_CONF_DIR=${HIVE_CONF_DIR}" >> ${HIVE_CONF_DIR}/hive-env.sh \
+	&& echo "export TEZ_CONF_DIR=${TEZ_CONF_DIR}" >> ${HIVE_CONF_DIR}/hive-env.sh \
+	&& echo "export TEZ_JARS=${TEZ_JARS}" >> ${HIVE_CONF_DIR}/hive-env.sh \
+	&& echo "export HADOOP_CLASSPATH=${HADOOP_HOME}/lib/*:${TEZ_CONF_DIR}:${TEZ_HOME}/*:${TEZ_LIB_DIR}/*:${HIVE_HOME}/lib/*:." >> ${HIVE_CONF_DIR}/hive-env.sh \
+	&& chown -R hive:hadoop ${HIVE_HOME} \
+	&& mkdir -p /var/log/hadoop-hive/ \
+	&& echo "export HIVE_HOME=${HIVE_HOME}" >> ~/.bashrc  
+
+ADD config/hive/ ${HIVE_CONF_DIR}/
+
+RUN mkdir /usr/local/pgsql \ 
+	&& chown postgres /usr/local/pgsql \
+	&& ln -sfn ${HIVE_CONF_DIR}/* ${HADOOP_CONF_DIR} \
+	&& chpasswd <<<"postgres:hivemetastore" \
+	&& su postgres -c 'pg_ctl initdb -D /usr/local/pgsql/data' \
+	&& echo "listen_addresses='*'" >> /usr/local/pgsql/data/postgresql.conf 
+
+#####################################################################
+
+# Install Spark
+
+# Configuration https://ravi-chamarthy.medium.com/configuring-spark-and-running-spark-applications-983e5fdd6499 
+
+# Downloaded from SPARK_URL=https://mirrors.estointernet.in/apache/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz
+
+ENV SPARK_HOME=/usr/local/spark
+
+ADD dependencies/spark-*-bin-hadoop3.2 /tmp/spark/
+
+RUN mkdir -pv ${SPARK_HOME} \
+	&& ln -s /tmp/spark/* ${SPARK_HOME}/ \
+	&& ln -s ${HIVE_HOME}/conf/hive-site.xml ${SPARK_HOME}/conf/hive-site.xml \
+	&& mkdir -pv /var/log/hadoop-spark/ \
+	&& mkdir -pv ${SPARK_HOME}/logs \
+	&& mkdir -pv /tmp/spark-events \ 
+	&& chown yarn:hadoop -R ${SPARK_HOME} \
+	&& chown yarn:hadoop /tmp/spark-events \
+	&& chmod 755 -R ${SPARK_HOME}/conf/* \
+	&& echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HADOOP_HOME/lib/native" >> /usr/local/spark/conf/spark-env.sh \ 
+	&& echo "export SPARK_MASTER_HOST=localhost" >> /usr/local/spark/conf/spark-env.sh \ 
+	&& echo "export SPARK_CLASSPATH=${HIVE_HOME}/lib/postgresql-jdbc.jar" >> /usr/local/spark/conf/spark-env.sh \ 
+	&& echo "export SPARK_CLASSPATH=${HIVE_HOME}/lib/postgresql-jdbc.jar" >> ~/.bashrc \
+	&& echo "export SPARK_HOME=${SPARK_HOME}" >> ~/.bashrc 
+
+ADD config/spark/ ${SPARK_HOME}/conf/
+
+ENV PATH="${PATH}:${SPARK_HOME}/bin"
+
+#####################################################################
+# Downloaded from https://www.apache.org/dyn/closer.lua/zookeeper/zookeeper-3.7.0/apache-zookeeper-3.7.0-bin.tar.gz
+
+# For kerberos read : https://medium.com/@xenonstack/how-to-secure-apache-zookeeper-with-kerberos-7d7b74082c19
+
+# Descargar zookeeper
+
+ENV ZOOKEEPER_HOME=/usr/local/zookeeper \ 
+	ZOOKEEPER_CONF_DIR=/usr/local/zookeeper/conf
+
+ADD --chown=zookeeper:hadoop dependencies/apache-zookeeper-*-bin /tmp/zookeeper
+
+RUN mkdir -pv ${ZOOKEEPER_HOME} \
+	&& chown zookeeper:hadoop -R ${ZOOKEEPER_HOME} \
+	&& ln -s /tmp/zookeeper/* ${ZOOKEEPER_HOME} \
+	&& mkdir -pv /var/lib/zookeeper/log \ 
+	&& mkdir -pv /var/log/hadoop-zookeeper \
+	&& chown zookeeper:hadoop -R /var/lib/zookeeper \
+	&& chown zookeeper:hadoop -R /var/log/hadoop-zookeeper \
+	&& echo "export ZOOKEEPER_HOME=${ZOOKEEPER_HOME}" >> ~/.bashrc
+
+ADD config/zookeeper/ ${ZOOKEEPER_HOME}/conf/
+
+ENV PATH=${PATH}:${ZOOKEEPER_HOME}/bin  
+
+#####################################################################
+
+# Downloaded from https://hbase.apache.org/downloads.html
+# Configuration https://programmerclick.com/article/42141208240/
+# http://hbase.apache.org/book.html#_overriding_configuration_starting_the_hbase_shell
+
+# Descargar hbase
+
+ENV HBASE_HOME=/usr/local/hbase \
+	HBASE_CONF_DIR=/usr/local/hbase/conf
+
+ADD dependencies/hbase-* /tmp/hbase
+
+RUN mkdir -pv ${HBASE_HOME} \
+	&& ln -s /tmp/hbase/* ${HBASE_HOME} \ 
+	&& mkdir -pv /var/log/hadoop-hbase/local/jars \
+	&& echo "export HBASE_HOME=${HBASE_HOME}" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "export HBASE_CONF_DIR=${HBASE_CONF_DIR}" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "export JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which javac)))))" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "export HBASE_MANAGES_ZK=true" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "export HBASE_OPTS="-Djava.security.auth.login.config=${HBASE_CONF_DIR}/hbase-client.jaas"" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "export HBASE_CLASSPATH=${HADOOP_HOME}/lib/*:${TEZ_CONF_DIR}:${TEZ_HOME}/*:${TEZ_LIB_DIR}/*:${HIVE_HOME}/lib/*:${HBASE_HOME}/lib/*:${ZOOKEEPER_HOME}/lib/*:." >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "export HBASE_OPTS="-Djava.security.auth.login.config=${HBASE_CONF_DIR}/hbase-client.jaas"" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "export HBASE_ZOOKEEPER_OPTS="-Djava.security.auth.login.config=${HBASE_CONF_DIR}/hbase.jaas"" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "export HBASE_REGIONSERVER_OPTS="-Djava.security.auth.login.config=${HBASE_CONF_DIR}/hbase.jaas"" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "export HBASE_MASTER_OPTS="-Djava.security.auth.login.config=${HBASE_CONF_DIR}/hbase.jaas"" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "SERVER_JVMFLAGS="-Djava.security.auth.login.config=${HBASE_CONF_DIR}/zookeeper.jaas"" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "export CLIENT_JVMFLAGS="-Djava.security.auth.login.config=${HBASE_CONF_DIR}/zookeeper-client.jaas"" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "export HBASE_CLASSPATH=$HBASE_HOME/lib:$HBASE_HOME/lib/client-facing-thirdparty:$HBASE_HOME/lib/ruby:$HBASE_HOME/lib/zkcli:$HBASE_HOME/lib/shaded-clients" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "HBASE_CONF_hbase_zookeeper_peerport=2888" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "HBASE_CONF_hbase_zookeeper_leaderport=3888" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& echo "HBASE_CONF_hbase_zookeeper_property_clientPort=2181" >> ${HBASE_CONF_DIR}/hbase-env.sh \
+	&& mkdir -pv ${HBASE_HOME}/logs \
+	&& ln -sfn ${HBASE_CONF_DIR}/* ${HADOOP_CONF_DIR} \
+	&& chown hbase:hadoop -R /usr/local/hbase \
+	&& echo "export HBASE_HOME=/usr/local/hbase" >> ~/.bashrc \
+	&& ln -s $HADOOP_CONF_DIR/core-site.xml $HBASE_CONF_DIR/ \
+	&& ln -s $HADOOP_CONF_DIR/hdfs-site.xml $HBASE_CONF_DIR/ \
+	&& echo "HBASE_DIST="http://archive.apache.org/dist/hbase"" >> ${HBASE_CONF_DIR}/hbase-env.sh
+
+ADD config/hbase/ ${HBASE_HOME}/conf/
+
+ENV PATH=${PATH}:${HBASE_HOME}/bin
+
+#####################################################################
+
+# Descargar Atlas 
+
+# installation guide : https://atlas.apache.org/2.0.0/InstallationSteps.html
+ENV ATLAS_URL=https://ftp.cixug.es/apache/atlas/2.1.0/apache-atlas-${ATLAS_VERSION}.0-sources.tar.gz \
+	ATLAS_HOME=/usr/local/atlas \
+	ATLAS_CONF_DIR=/usr/local/atlas/conf
+
+# Atlas
+ADD  --chown=atlas:hadoop dependencies/atlas/apache-atlas-* /tmp/atlas
+RUN mkdir -pv ${ATLAS_HOME} \
+	&& mkdir -pv /var/log/hadoop-atlas/ \
+	&& mkdir -pv /tmp/atlas/apache-atlas-${ATLAS_VERSION}/logs \
+	&& ln -s /tmp/atlas/* ${ATLAS_HOME} \
+	&& chown atlas:hadoop -R /var/log/hadoop-atlas/ \
+	&& mkdir -p ${ATLAS_HOME}/logs \
+	&& chown atlas:hadoop -R ${ATLAS_HOME}/logs \
+	&& mkdir -p ${ATLAS_HOME}/data \
+	&& chown atlas:hadoop -R ${ATLAS_HOME}/data \  
+	&& sed -i "s/export MANAGE_LOCAL_HBASE=true/export MANAGE_LOCAL_HBASE=false/" ${ATLAS_HOME}/conf/atlas-env.sh  \
+	&& sed -i "s/MANAGE_LOCAL_SOLR=true/export MANAGE_LOCAL_SOLR=false/" ${ATLAS_HOME}/conf/atlas-env.sh \
+	&& echo "export HBASE_CONF_DIR=/usr/local/hbase/conf" >> /${ATLAS_HOME}/conf/atlas-env.sh \
+	&& echo "export ATLAS_CONF_DIR=${ATLAS_HOME}/conf"  >> ${ATLAS_HOME}/conf/atlas-env.sh \
+	&& echo "export ATLAS_DATA_DIR=${ATLAS_HOME}/data"  >>${ATLAS_HOME}/conf/atlas-env.sh \
+	&& echo "export ATLAS_LOG_DIR=${ATLAS_HOME}/logs"  >> ${ATLAS_HOME}/atlas-env.sh \
+	&& echo "ATLAS_EXPANDED_WEBAPP_DIR=${ATLAS_HOME}/server/webapp"  >> ${ATLAS_HOME}/conf/atlas-env.sh \
+	&& echo "export MANAGE_LOCAL_HBASE=false"  >>${ATLAS_HOME}/conf/atlas-env.sh \
+	&& echo "export MANAGE_LOCAL_SOLR=false"  >> ${ATLAS_HOME}/conf/atlas-env.sh
+
+ADD config/atlas/atlas-application.properties ${ATLAS_HOME}/conf/
+
+#####################################################################
+
+# Descargar Ranger & Solr
+
+# Set environment
+
+ENV RANGER_HOME=/opt/ranger \ 
+	RANGER_USER_HOME=/opt/ranger-usersync \ 
+	RANGER_HIVE_HOME=/opt/ranger-hive \ 
+	RANGER_HDFS_HOME=/opt/ranger-hdfs \ 
+	RANGER_HBASE_HOME=/opt/ranger-hbase \ 
+	RANGER_YARN_HOME=/opt/ranger-yarn \ 
+	RANGER_SOLR_PUGIN_HOME=/opt/ranger-solr \ 
+	RANGER_ATLAS_PUGIN_HOME=/opt/ranger-atlas \ 
+	SOLR_HOME=/opt/solr
+
+# Downloaded from  RANGER_URL=https://downloads.apache.org/ranger/${RANGER_VERSION}/apache-ranger-${RANGER_VERSION}.tar.gz 
+
+# Ranger solr
+# read https://cwiki.apache.org/confluence/display/RANGER/Install+and+Configure+Solr+for+Ranger+Audits+-+Apache+Ranger+0.5 
+# download web http://archive.apache.org/dist/lucene/solr/5.2.1/solr-5.2.1.tgz
+# git clone https://github.com/apache/incubator-ranger.git
+# cd incubator-ranger/security-admin/contrib/solr_for_audit_setup
+
+# Solr
+ADD --chown=solr:hadoop dependencies/solr-* /tmp/solr/
+
+ADD --chown=solr:hadoop dependencies/incubator-ranger/ /tmp/set-solr/
+ADD --chown=solr:hadoop config/ranger/install.properties.solr /tmp/set-solr/security-admin/contrib/solr_for_audit_setup/install.properties
+
+RUN mkdir -pv ${SOLR_HOME} \
+	&& mv /tmp/solr/* ${SOLR_HOME} \
+	&& mkdir -pv ${SOLR_HOME}/ranger_audit_server/archive \
+	&& mkdir -pv /var/log/hadoop-solr \
+	&& sed -i -r "s|#JAVA_HOME=|JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which javac)))))|" /tmp/set-solr/security-admin/contrib/solr_for_audit_setup/install.properties \
+	&& chown solr:hadoop -R /var/log/hadoop-solr 
+	
+# Ranger admin 
+ADD --chown=ranger:hadoop dependencies/ranger/ranger-*-admin /tmp/ranger
+RUN mkdir -pv ${RANGER_HOME} \
+	&& mkdir /tmp/ranger/policies \
+	&& mv /tmp/ranger/* ${RANGER_HOME}/ \
+	&& ln -sf ${RANGER_HOME}/ews/start-ranger-admin.sh /usr/bin/ranger-admin-start \
+	&& ln -sf ${RANGER_HOME}/ews/stop-ranger-admin.sh /usr/bin/ranger-admin-stop \
+	&& mkdir -p /var/log/hadoop-ranger/ \
+	&& chown -R ranger:hadoop /var/log/hadoop-ranger/ 
+
+ADD config/ranger/install.properties.admin ${RANGER_HOME}/install.properties
+ADD config/ranger/policies ${RANGER_HOME}/policies/
+
+# Ranger usersync
+ADD --chown=ranger:hadoop dependencies/ranger/ranger-*-usersync /tmp/ranger-usersync
+RUN mkdir -pv ${RANGER_USER_HOME} \
+	&& mkdir -pv /tmp/ranger-usersync/logs/ \
+	&& mkdir -pv /tmp/ranger-usersync/conf/cert/ \
+	&& sed -i "s/usersyncBaseDirName = 'usersync'/usersyncBaseDirName = ''/" /tmp/ranger-usersync/setup.py \
+	&& ln -s /tmp/ranger-usersync/* ${RANGER_USER_HOME} \
+	&& mkdir -pv /var/log/hadoop-ranger/hadoop-ranger-usersync \	
+	&& chown ranger:hadoop /var/log/hadoop-ranger/hadoop-ranger-usersync \
+	&& chgrp -R hadoop /var/log/hadoop-ranger/hadoop-ranger-usersync 
+
+ADD config/ranger/install.properties.usersync ${RANGER_USER_HOME}/install.properties
+
+# Ranger hdfs 
+ADD dependencies/ranger/ranger-*-hdfs-plugin /tmp/ranger-hdfs
+RUN mkdir -pv ${RANGER_HDFS_HOME} \
+	&& mkdir -pv ${HADOOP_HOME}/conf/ \
+	&& ln -s /tmp/ranger-hdfs/* ${RANGER_HDFS_HOME} \
+	&& ln -s ${HADOOP_CONF_DIR}/* ${HADOOP_HOME}/conf/ 
+
+ADD config/ranger/install.properties ${RANGER_HDFS_HOME}/install.properties
+ADD config/ranger/xasecure-audit.xml ${HADOOP_HOME}/conf/xasecure-audit.xml
+ADD config/ranger/xasecure-audit.xml ${HADOOP_CONF_DIR}/xasecure-audit.xml
+
+# Ranger yarn 
+ADD dependencies/ranger/ranger-*-yarn-plugin /tmp/ranger-yarn
+RUN mkdir -pv ${RANGER_YARN_HOME} \
+	&& ln -s /tmp/ranger-yarn/* ${RANGER_YARN_HOME} 
+
+ADD config/ranger/install.properties ${RANGER_YARN_HOME}/install.properties
+
+# Ranger hive 
+ADD dependencies/ranger/ranger-*-hive-plugin /tmp/ranger-hive
+RUN mkdir -pv ${RANGER_HIVE_HOME} \
+	&& ln -s /tmp/ranger-hive/* ${RANGER_HIVE_HOME} 
+
+ADD config/ranger/install.properties ${RANGER_HIVE_HOME}/install.properties
+ADD config/ranger/xasecure-audit.xml ${HIVE_HOME}/conf/xasecure-audit.xml
+
+# Ranger hbase
+
+# http://coheigea.blogspot.com/2017/06/securing-apache-hbase-part-i.html
+
+ADD dependencies/ranger/ranger-*-hbase-plugin /tmp/ranger-hbase
+RUN mkdir -pv ${RANGER_HBASE_HOME} \
+	&& ln -s /tmp/ranger-hbase/* ${RANGER_HBASE_HOME} \
+	&& mkdir -pv /etc/hbase/conf/
+
+ADD config/ranger/install.properties ${RANGER_HBASE_HOME}/install.properties
+ADD config/ranger/xasecure-audit.xml ${HBASE_HOME}/conf/xasecure-audit.xml
+
+# Ranger solr
+
+ADD dependencies/ranger/ranger-*-solr-plugin /tmp/ranger-atlas
+RUN mkdir -pv ${RANGER_SOLR_PUGIN_HOME} \
+	&& ln -s /tmp/ranger-atlas/* ${RANGER_SOLR_PUGIN_HOME} \
+	&& cp ${HADOOP_HOME}/share/hadoop/common/lib/guava-*.jar ${RANGER_SOLR_PUGIN_HOME}/install/lib/ 
+
+ADD config/ranger/install.properties ${RANGER_SOLR_PUGIN_HOME}/install.properties
+ADD config/ranger/xasecure-audit.xml ${SOLR_HOME}/conf/xasecure-audit.xml
+
+# Ranger atlas
+ADD dependencies/ranger/ranger-*-atlas-plugin /tmp/ranger-atlas
+RUN mkdir -pv ${RANGER_ATLAS_PUGIN_HOME} \
+	&& mkdir -pv ${HADOOP_HOME}/conf/ \
+	&& ln -s /tmp/ranger-atlas/* ${RANGER_ATLAS_PUGIN_HOME} 
+
+ADD config/ranger/install.properties ${RANGER_ATLAS_PUGIN_HOME}/install.properties
+ADD config/ranger/xasecure-audit.xml ${ATLAS_HOME}/conf/xasecure-audit.xml
+
+#####################################################################
+# So PATH is set applications.
+ 
+RUN echo "export JAVA_CLASSPATH=$(dirname $(dirname $(readlink $(readlink $(which javac)))))/lib/dt.jar:$(dirname $(dirname $(readlink $(readlink $(which javac)))))/lib/tools.jar" >> ~/.bashrc  \ 
+	&& echo "export PATH=${PATH}:." >> ~/.bashrc  \
+	&& echo "export CLASSPATH=$CLASSPATH:${TEZ_CONF_DIR}:${TEZ_HOME}/*:${TEZ_LIB_DIR}/*:${HIVE_HOME}/lib/*:${HBASE_HOME}/lib/*:${ZOOKEEPER_HOME}/lib/*:." >> ~/.bashrc  \
+	&& echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HADOOP_HOME/lib/native" >> ~/.bashrc  \
+	&& echo "export HADOOP_CLASSPATH=${HADOOP_HOME}/lib/*:${TEZ_CONF_DIR}:${TEZ_HOME}/*:${TEZ_LIB_DIR}/*:${HIVE_HOME}/lib/*:${HBASE_HOME}/lib/*:${ZOOKEEPER_HOME}/lib/*:." >> ~/.bashrc  \
+	&& echo "export HADOOP_CLASSPATH=${HADOOP_HOME}/lib/*:${TEZ_CONF_DIR}:${TEZ_HOME}/*:${TEZ_LIB_DIR}/*:${HIVE_HOME}/lib/*:." >> $HADOOP_CONF_DIR/hadoop-env.sh \
+	&& source $HADOOP_HOME/etc/hadoop/hadoop-env.sh
+
+############################################################
+# Establecer Puertos
+
+# Por último dejamos abiertos unos cuantos puertos. En principio no son necesarios todos, pero los dejo así por si en un futuro los necesito.
+EXPOSE 50070 50075 50010 50020 50090 8020 9000 9864 9870 10020 19888 8088 8030 8031 8032 8033 8040 8042 22 10020 19888 9999 8080 10002 5432 8188 35615 6080 88 749 464 18080 2181 8020 8021 60010 16000 16010 16020 16030 8085 9095 21000
+# Mapred ports: 10020, 19888
+# Tez ui ports: 9999 8080
+# Hive ui: 10002 
+# PSQL: 5432
+# YARN timeserver: 8188 35615
+# RANGER admin: 6080
+# RANGER SOLR: 6083
+# KERBEROS: 88 749 464
+# SPARK: 18080
+# ZOOKEEPER: 2181 8020
+# HBASE: 8021 60010 16000 16010 16020 16030
+# HBASE REST UI : 8085
+# HBase Thrift Server Web UI: 9095
+# ATLAS: 21000
+
+# start hadoop
+CMD bash $HADOOP_HOME/etc/hadoop/docker-entrypoint.sh
+
+# ENTRYPOINT ["/opt/tools/run_tests_docker.sh"]
+# CMD ["-i"]
+
+

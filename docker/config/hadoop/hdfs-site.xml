@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <!-- General -->
+    <property>
+        <name>dfs.replication</name>
+        <value>1</value>
+    </property>
+
+  <!--
+    Specifies the UNIX group containing users that will be treated as superusers
+    by HDFS. You can stick with the value of 'hadoop' or pick your own group
+    depending on the security policies at your site.
+  -->
+    <property> 
+        <name>dfs.permissions.superusergroup</name> 
+        <value>hadoop</value> 
+    </property>
+    <property>
+        <name>dfs.block.access.token.enable</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>ignore.secure.ports.for.testing</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>dfs.http.policy</name>
+        <value>HTTP_ONLY</value>
+	</property>
+    
+    <!-- Namenode -->
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>/dfs/name</value> 
+    </property>
+    <property>
+        <name>dfs.namenode.acls.enabled</name>
+        <value>true</value> 
+    </property>
+    <property>
+        <name>dfs.namenode.keytab.file</name>
+        <value>/var/keytabs/hdfs.keytab</value>
+    </property>
+    <property>
+        <name>dfs.namenode.kerberos.principal</name>
+        <value>hdfs/_HOST@EXAMPLE.COM</value>
+    </property>
+    <property>
+        <name>dfs.namenode.kerberos.internal.spnego.principal</name>
+        <value>HTTP/_HOST@EXAMPLE.COM</value>
+    </property>
+
+    <!-- Datanode -->
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>/dfs/data</value>
+    </property>
+    <property>
+        <name>dfs.datanode.data.dir.perm</name>
+        <value>700</value> 
+    </property>
+    <property>
+        <name>dfs.datanode.keytab.file</name>
+        <value>/var/keytabs/hdfs.keytab</value> 
+    </property>
+    <property>
+        <name>dfs.datanode.kerberos.principal</name>
+        <value>hdfs/_HOST@EXAMPLE.COM</value>
+    </property>
+    <property>
+        <name>dfs.datanode.data.dir.perm</name>
+        <value>700</value>
+    </property>
+
+    <!-- WebHDFS -->
+    <property>
+        <name>dfs.webhdfs.enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>dfs.web.authentication.kerberos.principal</name>
+        <value>HTTP/_HOST@EXAMPLE.COM</value>
+    </property>
+    <property>
+        <name>dfs.web.authentication.kerberos.keytab</name>
+        <value>/var/keytabs/hdfs.keytab</value>
+    </property>
+
+    <!-- Ranger -->
+    <property>
+        <name>dfs.permissions.enabled</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>dfs.permissions</name>
+        <value>true</value>
+    </property>
+
+</configuration>
+

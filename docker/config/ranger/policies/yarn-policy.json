@@ -1,0 +1,72 @@
+{
+   "service":"yarndev",
+   "name":"Test-yarn-tallada",
+   "policyType":0,
+   "policyPriority":1,
+   "description":"",
+   "isAuditEnabled":true,
+   "resources":{
+      "queue":{
+         "values":[
+            "root.default",
+            "root.spark"
+         ],
+         "isExcludes":false,
+         "isRecursive":true
+      }
+   },
+   "policyItems":[
+      {
+         "accesses":[
+            {
+               "type":"submit-app",
+               "isAllowed":true
+            },
+            {
+               "type":"admin-queue",
+               "isAllowed":true
+            }
+         ],
+         "users":[
+            "tallada"
+         ],
+         "groups":[
+            "tallada"
+         ],
+         "roles":[
+            
+         ],
+         "conditions":[
+            
+         ],
+         "delegateAdmin":true
+      }
+   ],
+   "denyPolicyItems":[
+      
+   ],
+   "allowExceptions":[
+      
+   ],
+   "denyExceptions":[
+      
+   ],
+   "dataMaskPolicyItems":[
+      
+   ],
+   "rowFilterPolicyItems":[
+      
+   ],
+   "serviceType":"yarn",
+   "options":{
+      
+   },
+   "validitySchedules":[
+      
+   ],
+   "policyLabels":[
+      
+   ],
+   "zoneName":"",
+   "isDenyAllElse":false
+}

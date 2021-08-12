@@ -1,0 +1,21 @@
+{
+   "type":"hbase",
+   "name":"hbasedev",
+   "displayName":"hbasedev",
+   "description":"",
+   "configs":{
+      "hbase.zookeeper.quorum":"localhost",
+      "tag.download.auth.users":"hbase",
+      "password":"s3cUr1tyr4Ng3r",
+      "policy.download.auth.users":"hbase",
+      "hadoop.security.authentication":"kerberos",
+      "hbase.security.authentication":"kerberos",
+      "hbase.zookeeper.property.clientPort":"2181",
+      "zookeeper.znode.parent":"/hbase",
+      "hbase.master.kerberos.principal":"hbase/_HOST@EXAMPLE.COM",
+      "username":"rangerlookup"
+   },
+   "tag.download.auth.users":"hbase",
+   "policy.download.auth.users":"hbase",
+   "policy.grantrevoke.auth.users":"hbase"
+}

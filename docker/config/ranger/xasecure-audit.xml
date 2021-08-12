@@ -1,0 +1,18 @@
+<configuration>
+<property>
+	<name>xasecure.audit.is.enabled</name>
+	<value>true</value>
+</property>
+<property> 
+	<name>xasecure.audit.jpa.javax.persistence.jdbc.url</name>
+	<value>jdbc:postgresql://localhost/ranger_audit</value>
+</property>
+<property>
+	<name>xasecure.audit.jpa.javax.persistence.jdbc.user</name>
+	<value>rangerlookup</value>
+</property>
+<property> 
+	<name>xasecure.audit.jpa.javax.persistence.jdbc.password</name>
+	<value>s3cUr1tyr4Ng3r</value>
+</property>
+</configuration>

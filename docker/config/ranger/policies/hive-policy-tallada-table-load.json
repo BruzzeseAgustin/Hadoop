@@ -1,0 +1,76 @@
+{
+   "isEnabled":true,
+   "version":1,
+   "service":"hivedev",
+   "name":"Test-Tallada-History",
+   "policyType":0,
+   "policyPriority":0,
+   "description":"",
+   "isAuditEnabled":true,
+   "resources":{
+      "database":{
+         "values":[
+            "default"
+         ],
+         "isExcludes":false,
+         "isRecursive":false
+      },
+      "table":{
+         "values":[
+            "history_raw"
+         ],
+         "isExcludes":false,
+         "isRecursive":false
+      }
+   },
+   "policyItems":[
+      {
+         "accesses":[
+            {
+               "type":"update",
+               "isAllowed":true
+            }
+         ],
+         "users":[
+            "tallada"
+         ],
+         "groups":[
+            
+         ],
+         "roles":[
+            
+         ],
+         "conditions":[
+            
+         ],
+         "delegateAdmin":false
+      }
+   ],
+   "denyPolicyItems":[
+      
+   ],
+   "allowExceptions":[
+      
+   ],
+   "denyExceptions":[
+      
+   ],
+   "dataMaskPolicyItems":[
+      
+   ],
+   "rowFilterPolicyItems":[
+      
+   ],
+   "serviceType":"hive",
+   "options":{
+      
+   },
+   "validitySchedules":[
+      
+   ],
+   "policyLabels":[
+      
+   ],
+   "zoneName":"",
+   "isDenyAllElse":false
+}

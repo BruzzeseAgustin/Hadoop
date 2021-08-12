@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+<!--
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+<configuration>
+
+<!-- Site specific YARN configuration properties -->
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle,spark_shuffle</value>
+    </property>
+<!-- SPARK option -->
+    <property>
+        <name>yarn.nodemanager.aux-services.spark_shuffle.class</name>
+        <value>org.apache.spark.network.yarn.YarnShuffleService</value>
+    </property>
+    <property>
+        <name>yarn.application.classpath</name>
+        <value>/usr/local/spark/jars/*.jar</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.aux-services.spark2_shuffle.class</name>
+        <value>org.apache.spark.network.yarn.YarnShuffleService</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.aux-services.spark_shuffle.classpath</name>
+        <value>/usr/local/spark/yarn/*</value>
+    </property>
+<!-- SPARK option -->
+    <property>
+        <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
+        <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.disk-health-checker.max-disk-utilization-per-disk-percentage</name>
+        <value>100</value>
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.resource.cpu-vcores</name>
+        <value>2</value>
+    </property>
+
+    <!-- Kerberos -->
+    <property>
+        <name>yarn.resourcemanager.keytab</name>
+        <value>/var/keytabs/yarn.keytab</value> 
+    </property>
+    <property>
+        <name>yarn.resourcemanager.principal</name>
+        <value>yarn/_HOST@EXAMPLE.COM</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.keytab</name>
+        <value>/var/keytabs/yarn.keytab</value> 
+    </property>
+    <property>
+        <name>yarn.nodemanager.principal</name>
+        <value>yarn/_HOST@EXAMPLE.COM</value>
+    </property>
+
+    <!-- Disable virtuak memory checks -->
+    <property>
+        <name>yarn.nodemanager.vmem-check-enabled</name>
+        <value>false</value>
+    </property>
+
+
+    <!-- Timelineserver -->
+    <property>
+        <name>yarn.timeline-service.enabled</name>
+        <value>true</value>
+    </property>
+    
+    <property>
+        <name>yarn.acl.enable</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>yarn.admin.acl</name>
+        <value>yarn,tallada</value>
+    </property> 
+
+    <property>
+        <description>Enables cross-origin support (CORS) for web services where
+        cross-origin web response headers are needed. For example, javascript making
+        a web services request to the timeline server.</description>
+       <name>yarn.timeline-service.http-cross-origin.enabled</name>
+       <value>true</value>
+    </property>
+
+    <property>
+       <name>yarn.nodemanager.webapp.cross-origin.enabled</name>
+       <value>true</value>
+    </property>
+
+    <property>
+       <name>yarn.resourcemanager.webapp.cross-origin.enabled</name>
+       <value>true</value>
+    </property>
+
+    <property>
+        <description>Publish YARN information to Timeline Server</description>
+        <name>yarn.resourcemanager.system-metrics-publisher.enabled</name>
+        <value>true</value>
+    </property>
+ 
+    <property>
+        <name>yarn.timeline-service.generic-application-history.enabled</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>yarn.timeline-service.keytab</name>
+        <value>/var/keytabs/yarn.keytab</value>
+    </property>
+
+    <property>
+        <name>yarn.timeline-service.principal</name>
+        <value>yarn/_HOST@EXAMPLE.COM</value>
+    </property>
+
+   <property>
+        <name>yarn.timeline-service.http-authentication.type</name>
+        <value>kerberos</value>
+    </property>
+
+    <property>
+        <name>yarn.timeline-service.http-authentication.kerberos.principal</name>
+        <value>HTTP/_HOST@EXAMPLE.COM</value>
+    </property>
+
+    <property>
+        <name>yarn.timeline-service.http-authentication.kerberos.keytab</name>
+        <value>/var/keytabs/HTTP.keytab</value>
+    </property>
+
+    <property>
+        <name>hadoop.http.cross-origin.allowed-origins</name>
+        <value>*</value>
+    </property>
+
+    <property>
+        <name>hadoop.http.filter.initializers</name> 
+        <value>org.apache.hadoop.security.AuthenticationFilterInitializer,org.apache.hadoop.security.HttpCrossOriginFilterInitializer</value>
+    </property>
+
+    <!-- Ranger -->
+    <property>
+        <name>yarn.resourcemanager.scheduler.class</name>    
+        <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler</value>
+    </property>
+
+    <!-- Ranger -->
+
+    <property>
+        <name>yarn.nodemanager.linux-container-executor.cgroups.strict-resource-usage</name>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.linux-container-executor.group</name>
+        <value>hadoop</value>
+    </property>
+<!--   
+    <property>
+        <name>yarn.nodemanager.linux-container-executor.nonsecure-mode.limit-users</name>
+        <value>false</value>
+        <description>CGroups itself has no requirements related to security. However, the LinuxContainerExecutor does have some requirements. If running in non-secure mode, by default, the LCE runs all jobs as user “nobody”. This user can be changed by setting “yarn.nodemanager.linux-container-executor.nonsecure-mode.local-user” to the desired user. However, it can also be configured to run jobs as the user submitting the job. In that case “yarn.nodemanager.linux-container-executor.nonsecure-mode.limit-users” should be set to false.</description>
+    </property>
+-->
+    <property>
+	<name>yarn.nodemanager.linux-container-executor.path</name>
+        <value>/usr/local/hadoop/bin/container-executor</value>
+    </property>
+
+    <property>
+        <name>yarn.nodemanager.container-executor.class</name>
+        <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
+    </property>
+
+</configuration>
+

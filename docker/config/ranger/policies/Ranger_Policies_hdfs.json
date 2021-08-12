@@ -1,0 +1,144 @@
+{
+  "metaDataInfo": {
+    "Host name": "localhost",
+    "Exported by": "admin",
+    "Export time": "Jun 28, 2021 1:01:56 PM",
+    "Ranger apache version": "2.1.0"
+  },
+  "policies": [
+    {
+      "service": "hadoopdev",
+      "name": "all - path",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Policy for all - path",
+      "isAuditEnabled": true,
+      "resources": {
+        "path": {
+          "values": [
+            "/*"
+          ],
+          "isExcludes": false,
+          "isRecursive": true
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "execute",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "rangerlookup"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": true
+        },
+        {
+          "accesses": [
+            {
+              "type": "read",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "rangerlookup"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hdfs",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 1,
+      "guid": "df775908-74c5-42d5-9015-a68259de1898",
+      "isEnabled": true,
+      "version": 1
+    },
+    {
+      "service": "hadoopdev",
+      "name": "kms-audit-path",
+      "policyType": 0,
+      "policyPriority": 0,
+      "description": "Policy for kms-audit-path",
+      "isAuditEnabled": true,
+      "resources": {
+        "path": {
+          "values": [
+            "/ranger/audit/kms"
+          ],
+          "isExcludes": false,
+          "isRecursive": true
+        }
+      },
+      "policyItems": [
+        {
+          "accesses": [
+            {
+              "type": "read",
+              "isAllowed": true
+            },
+            {
+              "type": "write",
+              "isAllowed": true
+            },
+            {
+              "type": "execute",
+              "isAllowed": true
+            }
+          ],
+          "users": [
+            "keyadmin"
+          ],
+          "groups": [],
+          "roles": [],
+          "conditions": [],
+          "delegateAdmin": false
+        }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "hdfs",
+      "options": {},
+      "validitySchedules": [],
+      "policyLabels": [],
+      "zoneName": "",
+      "isDenyAllElse": false,
+      "id": 2,
+      "guid": "24a05566-3d4f-4887-9831-43724e4b9a71",
+      "isEnabled": true,
+      "version": 1
+    }
+  ],
+  "startIndex": 0,
+  "pageSize": 0,
+  "totalCount": 0,
+  "resultSize": 0,
+  "queryTimeMS": 1624885316777
+}

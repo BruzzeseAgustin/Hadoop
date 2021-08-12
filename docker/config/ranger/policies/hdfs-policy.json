@@ -1,0 +1,34 @@
+{
+   "policyName":"HomePolicy",
+   "resourceName":"/home,/apps,/user,/user/tallada,/tmp",
+   "description":"Home",
+   "repositoryName":"hadoopdev",
+   "repositoryType":"hdfs",
+   "isEnabled":true,
+   "isRecursive":true,
+   "isAuditEnabled":true,
+   "permMapList":[
+      {
+         "userList":[
+            "tallada"
+         ],
+         "permList":[
+            "Write",
+            "Admin"
+         ]
+      },
+      {
+         "userList":[
+            "tallada"
+         ],
+         "groupList":[
+            "tallada"
+         ],
+         "permList":[
+            "Read",
+            "Write",
+            "Admin"
+         ]
+      }
+   ]
+}

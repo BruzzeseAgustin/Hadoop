@@ -1,0 +1,19 @@
+{
+   "configs":{
+      "password":"s3cUr1tyr4Ng3r",
+      "username":"rangerlookup",
+      "hadoop.security.authorization":"true",
+      "hadoop.security.authentication":"kerberos",
+      "dfs.datanode.kerberos.principal":"hdfs/_HOST@EXAMPLE.COM",
+      "dfs.namenode.kerberos.principal":"hdfs/_HOST@EXAMPLE.COM",
+      "dfs.secondary.namenode.kerberos.principal":"hdfs/_HOST@EXAMPLE.COM",
+      "fs.default.name":"hdfs://localhost:9000",
+      "tag.download.auth.users":"hdfs",
+      "policy.download.auth.users":"hdfs"
+   },
+   "description":"hdfsservice",
+   "isEnabled":true,
+   "name":"hadoopdev",
+   "type":"hdfs",
+   "version":1
+}

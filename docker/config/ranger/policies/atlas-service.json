@@ -1,0 +1,19 @@
+{
+   "isEnabled":true,
+   "createdBy":"Admin",
+   "updatedBy":"Admin",
+   "createTime":1626271595301,
+   "updateTime":1626271595302,
+   "version":1,
+   "type":"atlas",
+   "name":"atlasdev",
+   "displayName":"atlasdev",
+   "description":"",
+   "configs":{
+      "atlas.rest.address":"http://localhost:21000",
+      "password":"admin",
+      "username":"admin"
+   },
+   "tag.download.auth.users":"atlas",
+   "policy.download.auth.users":"atlas"
+}

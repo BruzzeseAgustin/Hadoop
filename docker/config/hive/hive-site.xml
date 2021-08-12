@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+
+    <property>
+        <name>hive.metastore.warehouse.dir</name>
+        <value>/warehouse</value>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionDriverName</name>
+        <value>org.postgresql.Driver</value>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+        <value>jdbc:postgresql://localhost:5432/hivemetastoredb</value>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionUserName</name>
+        <value>hive</value>
+    </property>
+
+    <property>
+        <name>hive.exec.scratchdir</name>
+        <value>/tmp/hive/${user.name}</value>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionPassword</name>
+        <value>hivemetastore</value>
+    </property>
+
+    <property>
+        <name>hive.server2.thrift.port</name>
+        <value>10000</value>
+    </property>
+
+    <property>
+        <name>hive.server2.thrift.http.port</name>
+        <value>10001</value>
+    </property>
+
+    <property>
+        <name>hive.server2.webui.port</name>
+        <value>10002</value>
+    </property>
+
+    <property>
+        <name>hive.metastore.port</name>
+        <value>9083</value>
+    </property>
+
+    <property>
+        <name>hive.execution.engine</name>
+        <value>tez</value>
+    </property>
+
+    <property>
+        <name>hive.tez.container.size</name>
+        <value>4096</value>
+    </property>
+
+    <property>
+        <name>mapreduce.input.fileinputformat.input.dir.recursive</name>
+        <value>true</value>
+    </property>
+
+    <!-- Kerberos --> 
+    <property>    
+        <name>hive.metastore.sasl.enabled</name>    
+        <value>true</value>    
+        <description>If true, the metastore thrift interface will be secured with
+        SASL.     
+        Clients must authenticate with Kerberos.
+        </description>  
+    </property>    
+    
+    <property>
+        <name>hive.server2.authentication.kerberos.keytab</name>
+        <value>/var/keytabs/hive.keytab</value>
+    </property>
+
+    <property>
+        <name>hive.server2.authentication.kerberos.principal</name>
+        <value>hive/_HOST@EXAMPLE.COM</value>
+    </property>
+
+    <property>
+        <name>hive.server2.authentication.spnego.keytab</name>
+        <value>/var/keytabs/HTTP.keytab</value>
+    </property>
+
+    <property>
+        <name>hive.server2.authentication.spnego.principal</name>
+        <value>HTTP/_HOST@EXAMPLE.COM</value>
+    </property>
+
+    <property>
+        <name>hive.metastore.kerberos.keytab.file</name>
+        <value>/var/keytabs/hive.keytab</value>
+    </property>
+
+    <property>
+        <name>hive.metastore.kerberos.principal</name>
+        <value>hive/_HOST@EXAMPLE.COM</value>
+        <description>
+          The service principal for the metastore Thrift server. 
+          The special string _HOST will be replaced automatically with the correct host name.
+        </description>
+    </property>
+
+    <property> 
+        <name>hive.server2.enable.doAs</name> 
+        <description>Enable user impersonation for HiveServer2</description>
+        <value>false</value>
+    </property>
+
+    <property>
+        <name>hive.server2.authentication</name>
+        <value>KERBEROS</value>
+        <description>Authentication type</description>
+    </property> 
+
+    <property>
+        <name>hive.server2.authentication.kerberos.principal</name>
+        <value>hive/_HOST@EXAMPLE.COM</value>
+        <description>
+	The service principal for the HiveServer2. 
+	If _HOST is used as the hostname portion, it will be replaced with the actual hostname of the running instance.
+	</description>
+    </property>
+
+    <property>
+        <name>hive.server2.authentication.kerberos.keytab</name>
+        <value>/var/keytabs/hive.keytab</value>
+        <description>The keytab for the HiveServer2 service principal</description>
+    </property>
+
+    <property>
+      <name>hive.server2.authentication.spnego.keytab</name>
+      <value>/var/keytabs/HTTP.keytab</value>
+    </property>
+
+    <property>
+      <name>hive.server2.authentication.spnego.principal</name>
+      <value>HTTP/_HOST@EXAMPLE.COM</value>
+    </property>
+
+    <property>
+      <name>datanucleus.autoCreateSchema</name>
+      <value>false</value>
+      <description>Creates necessary schema on a startup if one doesn't exist</description>
+    </property> 
+
+    <property>
+      <name>hive.tez.java.opts</name>
+      <value>-server -Djava.net.preferIPv4Stack=true -XX:NewRatio=8 -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB -XX:+PrintGCDetails -verbose:gc -XX:+PrintGCTimeStamps</value>
+      <description>Java opts to be specified for Tez tasks. If this is not specified
+     then java opts for map tasks are used from mapreduce configuration</description>
+    </property>
+
+    <property>
+      <name>hive.exec.pre.hooks</name>
+      <value>org.apache.hadoop.hive.ql.hooks.ATSHook</value>
+    </property>
+
+    <property>
+      <name>hive.exec.post.hooks</name>
+      <value>org.apache.hadoop.hive.ql.hooks.ATSHook</value>
+    </property>
+
+    <property>
+      <name>hive.exec.failure.hooks</name>
+      <value>org.apache.hadoop.hive.ql.hooks.ATSHook</value>
+    </property>
+
+    <!-- Timelineserver -->
+    <property>
+        <name>hive_timeline_logging_enabled</name>
+        <value>true</value>
+    </property>
+
+    <!-- Spark -->
+    <property>
+        <name>spark.yarn.jars</name>
+        <value>hdfs://localhost:9000/spark/share/lib/*</value>
+    </property>
+
+    <!--<property>
+      <name>hive.exec.pre.hooks</name>
+      <value>org.apache.hadoop.hive.ql.hooks.ATSHook</value>
+    </property>
+
+    <property>
+      <name>hive.exec.post.hooks</name>
+      <value>org.apache.hadoop.hive.ql.hooks.ATSHook</value>
+    </property> 
+
+    <property>
+      <name>hive.exec.failure.hooks</name>
+      <value>org.apache.hadoop.hive.ql.hooks.ATSHook</value>
+    </property>  -->
+
+    <!-- Timelineserver -->  
+
+</configuration>

@@ -1,0 +1,95 @@
+<configuration>
+    <property>
+        <name>tez.lib.uris</name>
+        <value>${fs.defaultFS}/apps/tez/tez.tar.gz</value>
+	<description>
+	 Comma-delimited list of the location of the Tez libraries which will be localized for DAGs. 		Specifying a single .tar.gz or .tgz assumes that a compressed version of the tez libs is being used. 
+	This is uncompressed into a tezlibs directory when running containers, and tezlibs/;tezlibs/lib/ are added to the classpath (after . and .*). If multiple files are specified - files are localized as regular files, contents of directories are localized as regular files (non-recursive). 
+	</description>
+    </property>
+
+    <property>
+        <name>tez.use.cluster.hadoop-libs</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>tez.runtime.compress</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>tez.runtime.compress.codec</name>
+        <value>org.apache.hadoop.io.compress.SnappyCodec</value>
+    </property>
+
+    <property>
+         <description>URL for where the Tez UI is hosted</description>
+         <name>tez.tez-ui.history-url.base</name>
+         <value>http://localhost:8080/</value>
+    </property>
+
+    <property>
+       <name>tez.history.logging.service.class</name>
+       <value>org.apache.tez.dag.history.logging.ats.ATSHistoryLoggingService</value>
+    </property>
+
+    <property>
+        <name>tez.runtime.convert.user-payload.to.history-text</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>tez.task.generate.counters.per.io</name>
+        <value>true</value>
+    </property>
+
+    <!-- Timelineserver -->
+    <property>
+	<name>tez.am.view-acls</name>
+	<value>*</value>
+	<description>AM view ACLs. This setting enables the specified users or groups to view the status of the AM and all DAGs that run within the AM.</description>
+    </property>
+
+    <property>
+        <name>tez.session.am.dag.submit.timeout.secs</name>
+        <value>2</value>
+    </property>
+
+    <property>
+        <name>tez.am.tez-ui.history-url.template</name>
+        <value>__HISTORY_URL_BASE__?viewPath=/#/tez-app/__APPLICATION_ID__</value>
+    </property>
+
+    <property>
+        <name>tez.dag.history.logging.enabled</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>tez.am.history.logging.enabled</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>tez.allow.disabled.timeline-domains</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>yarn.timeline-service.recovery.enabled</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>yarn.timeline-service.state-store-class</name>
+        <value>org.apache.hadoop.yarn.server.timeline.recovery.LeveldbTimelineStateStore</value>
+    </property>
+
+    <property>
+        <name>yarn.webapp.api-service.enable</name>
+        <value>true</value>
+    </property>
+
+</configuration>
+

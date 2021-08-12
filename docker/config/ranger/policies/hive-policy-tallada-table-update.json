@@ -1,0 +1,81 @@
+{
+   "service":"hivedev",
+   "name":"Test-Tallada-Table",
+   "policyType":0,
+   "policyPriority":0,
+   "description":"",
+   "isAuditEnabled":true,
+   "resources":{
+      "database":{
+         "values":[
+            "default"
+         ],
+         "isExcludes":false,
+         "isRecursive":false
+      },
+      "table":{
+         "values":[
+            "test"
+         ],
+         "isExcludes":false,
+         "isRecursive":false
+      }
+   },
+   "policyItems":[
+      {
+         "accesses":[
+            {
+               "type":"drop",
+               "isAllowed":true
+            },
+            {
+               "type":"alter",
+               "isAllowed":true
+            }
+         ],
+         "users":[
+            "tallada"
+         ],
+         "groups":[
+            
+         ],
+         "roles":[
+            
+         ],
+         "conditions":[
+            
+         ],
+         "delegateAdmin":false
+      }
+   ],
+   "denyPolicyItems":[
+      
+   ],
+   "allowExceptions":[
+      
+   ],
+   "denyExceptions":[
+      
+   ],
+   "dataMaskPolicyItems":[
+      
+   ],
+   "rowFilterPolicyItems":[
+      
+   ],
+   "serviceType":"hive",
+   "options":{
+      
+   },
+   "validitySchedules":[
+      
+   ],
+   "policyLabels":[
+      
+   ],
+   "zoneName":"",
+   "isDenyAllElse":false,
+   "guid":"bf03cee6-4cc6-4ce7-a967-53186f75b585",
+   "isEnabled":true,
+   "version":1
+}

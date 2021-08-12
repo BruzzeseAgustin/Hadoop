@@ -1,0 +1,54 @@
+ranger_base_dir=/opt/ranger-usersync/
+POLICY_MGR_URL=http://localhost:6080
+SYNC_SOURCE=unix
+MIN_UNIX_USER_ID_TO_SYNC=1000
+MIN_UNIX_GROUP_ID_TO_SYNC=1000
+unix_user=ranger
+unix_group=hadoop
+SYNC_INTERVAL = 1 
+hadoop_conf=/usr/local/hadoop/etc/hadoop
+rangerUsersync_password=s3cUr1tyr4Ng3r
+
+usersync_principal= rangerusersync/_HOST@EXAMPLE.COM
+usersync_keytab= /var/keytabs/rangerusersync.keytab
+
+CRED_KEYSTORE_FILENAME=/opt/ranger-usersync/conf/rangerusersync.jceks
+
+AUTH_SSL_ENABLED=true
+AUTH_SSL_KEYSTORE_FILE=/opt/ranger-usersync/conf/cert/unixauthservice.jks
+AUTH_SSL_KEYSTORE_PASSWORD=s3cUr1tyr4Ng3r
+AUTH_SSL_TRUSTSTORE_FILE=cacerts
+AUTH_SSL_TRUSTSTORE_PASSWORD=s3cUr1tyr4Ng3r
+
+# ROLE_ASSIGNMENT_LIST_DELIMITER = &
+# USERS_GROUPS_ASSIGNMENT_LIST_DELIMITER = :
+# USERNAME_GROUPNAME_ASSIGNMENT_LIST_DELIMITER = ,
+# with above mentioned delimiters a sample value would be ROLE_SYS_ADMIN:u:userName1,userName2&ROLE_SYS_ADMIN:g:groupName1,groupName2&ROLE_KEY_ADMIN:u:userName&ROLE_KEY_ADMIN:g:groupName&ROLE_USER:u:userName3,userName4&ROLE_USER:g:groupName3
+#&ROLE_ADMIN_AUDITOR:u:userName&ROLE_KEY_ADMIN_AUDITOR:u:userName&ROLE_KEY_ADMIN_AUDITOR:g:groupName&ROLE_ADMIN_AUDITOR:g:groupName
+# GROUP_BASED_ROLE_ASSIGNMENT_RULES =
+
+logdir=/var/log/hadoop-ranger/usersync
+USERSYNC_PID_DIR_PATH=/var/run/ranger
+
+SYNC_GROUP_SEARCH_ENABLED=true
+SYNC_GROUP_USER_MAP_SYNC_ENABLED=true
+SYNC_GROUP_SEARCH_BASE=
+SYNC_GROUP_SEARCH_SCOPE=
+SYNC_GROUP_OBJECT_CLASS=posixGroup
+SYNC_LDAP_GROUP_SEARCH_FILTER=
+SYNC_GROUP_NAME_ATTRIBUTE=
+SYNC_GROUP_MEMBER_ATTRIBUTE_NAME=
+SYNC_PAGED_RESULTS_ENABLED=
+SYNC_PAGED_RESULTS_SIZE=
+SYNC_LDAP_REFERRAL =ignore
+# if you want to enable or disable jvm metrics for usersync process
+# valid values: true, false
+# any value other than true would be treated as false
+# default value: false
+# if the value is false, jvm metrics is not created
+JVM_METRICS_ENABLED=true
+
+# filename of jvm metrics created for usersync process
+# default value: ranger_usersync_metric.json
+JVM_METRICS_FILENAME=ranger_usersync_metric.json
+
